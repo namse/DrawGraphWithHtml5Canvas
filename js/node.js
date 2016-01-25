@@ -13,7 +13,7 @@ function Node(image, x, y, width, height){
     this.highlightedDrawingLinePointDirection = undefined; // or DrawingLinePointDirection
     
 
-    const DrawingLinePointRadius = 2;
+    const DrawingLinePointRadius = 4;
     const DrawingLinePointDirection = {
         UP : 'up',
         DOWN : 'down',
@@ -26,7 +26,7 @@ function Node(image, x, y, width, height){
         for(var i in this.lines){
             this.lines[i].onRender();
         }
-        if(this.showDrawingLinePoint || true){
+        if(this.showDrawingLinePoint){
             for(var direction in DrawingLinePointDirection){
                 var position = this.getDrawingLinePointPosition(DrawingLinePointDirection[direction]);
                 ctx.beginPath();
