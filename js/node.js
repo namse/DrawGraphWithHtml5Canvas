@@ -1,5 +1,13 @@
 'use strict';
 
+const DrawingLinePointRadius = 4;
+const DrawingLinePointDirection = {
+    TOP: 'top',
+    BOTTOM: 'bottom',
+    LEFT: 'left',
+    RIGHT: 'right'
+};
+
 function Node(image, x, y, width, height) {
     // constructor
     this.image = image;
@@ -8,24 +16,19 @@ function Node(image, x, y, width, height) {
     this.width = width || image.width;
     this.height = height || image.height;
 
-    this.lines = [];
+    this.linesOfDirection = {};
+    this.linesOfDirection[DrawingLinePointDirection.TOP] = [];
+    this.linesOfDirection[DrawingLinePointDirection.BOTTOM] = [];
+    this.linesOfDirection[DrawingLinePointDirection.LEFT] = [];
+    this.linesOfDirection[DrawingLinePointDirection.RIGHT] = [];
     this.isFocus = false;
     this.highlightedDrawingLinePointDirection = undefined; // or DrawingLinePointDirection
 
 
-    const DrawingLinePointRadius = 4;
-    const DrawingLinePointDirection = {
-        UP: 'up',
-        DOWN: 'down',
-        LEFT: 'left',
-        RIGHT: 'right'
-    };
+
 
     this.onRender = function (ctx) {
         ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
-        for (var i in this.lines) {
-            this.lines[i].onRender();
-        }
         if (this.isFocus) {
             for (var direction in DrawingLinePointDirection) {
                 var position = this.getDrawingLinePointPosition(DrawingLinePointDirection[direction]);
@@ -78,12 +81,13 @@ function Node(image, x, y, width, height) {
             else if (this.x + (this.width) / 2 - radius <= x && x <= this.x + (this.width) / 2 + radius) {
                 // up
                 if (this.y <= y && y <= this.y + 2 * radius) {
-                    return DrawingLinePointDirection.UP;
+                    return DrawingLinePointDirection.TOP;
                 }
                 // down
                 else if (this.y + this.height - 2 * radius <= y && y <= this.y + this.height) {
-                    return DrawingLinePointDirection.DOWN;
+                    return DrawingLinePointDirection.BOTTOM;
                 }
+                console.log(this.y, this.height, y, this.y + this.height - 2 * radius);
             }
         }
         return false;
@@ -103,18 +107,37 @@ function Node(image, x, y, width, height) {
                 y: this.y + (this.height) / 2
             };
         }
-        else if (drawingLinePointDirection === DrawingLinePointDirection.UP) {
+        else if (drawingLinePointDirection === DrawingLinePointDirection.TOP) {
             return {
                 x: this.x + (this.width) / 2,
                 y: this.y + radius
             };
         }
-        else if (drawingLinePointDirection === DrawingLinePointDirection.DOWN) {
+        else if (drawingLinePointDirection === DrawingLinePointDirection.BOTTOM) {
             return {
                 x: this.x + (this.width) / 2,
                 y: this.y + this.height - radius
             };
         }
         return undefined;
+    };
+    
+    this.getNearestDrawingLinePointDirection = function (x, y){
+        var minDistanceSquare;
+        var minDirection;
+        for(var i in DrawingLinePointDirection){
+            var direction = DrawingLinePointDirection[i];
+            var position = this.getDrawingLinePointPosition(direction);
+            var distanceSquare = (position.x - x) * (position.x - x) + (position.y - y) * (position.y - y);
+            if(!!!minDistanceSquare || distanceSquare < minDistanceSquare){
+                minDistanceSquare = distanceSquare;
+                minDirection = direction;
+            }
+        }
+        return minDirection;
+    };
+    
+    this.addLineofDirection = function(line, direction){
+        this.linesOfDirection[direction].push(line);
     };
 }
