@@ -140,8 +140,26 @@ function Line(nodeA, directionA, nodeB, directionB) {
         case DrawingLinePointDirection.RIGHT:
             switch (aboveDirection) {
             case DrawingLinePointDirection.TOP:
+                if (belowRightX < aboveLeftX) {
+                    this.points.push(new Point(midX, belowCenterY));
+                    this.points.push(new Point(midX, aboveTopY));
+                    this.points.push(new Point(aboveCenterX, aboveTopY));
+                }
+                else {
+                    this.points.push(new Point(rightX, belowCenterY));
+                    this.points.push(new Point(rightX, aboveTopY));
+                    this.points.push(new Point(aboveCenterX, aboveTopY));
+                }
                 break;
             case DrawingLinePointDirection.BOTTOM:
+                if (belowRightX > aboveCenterX) {
+                    this.points.push(new Point(belowRightX, belowCenterY));
+                    this.points.push(new Point(belowRightX, midY));
+                    this.points.push(new Point(aboveCenterX, midY));
+                }
+                else {
+                    this.points.push(new Point(aboveCenterX, belowCenterY));
+                }
                 break;
             case DrawingLinePointDirection.LEFT:
                 this.points.push(new Point(midX, belowCenterY));
