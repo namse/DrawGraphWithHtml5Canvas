@@ -37,7 +37,6 @@ function Line(nodeA, directionA, nodeB, directionB) {
         var aboveCenterX = aboveNode.x + aboveNode.width / 2;
         var aboveRightX = aboveNode.x + aboveNode.width + LEAST_GAP;
 
-        var midX = (belowCenterX + aboveCenterX) / 2;
 
 
         var belowTopY = belowNode.y - LEAST_GAP;
@@ -48,8 +47,11 @@ function Line(nodeA, directionA, nodeB, directionB) {
         var aboveCenterY = aboveNode.y + aboveNode.height / 2;
         var aboveBottomY = aboveNode.y + aboveNode.height + LEAST_GAP;
 
+        var midX = (belowCenterX + aboveCenterX) / 2;
         var midY = (belowCenterY + aboveCenterY) / 2;
 
+        var leftX = Math.min(belowLeftX, aboveLeftX);
+        var rightX = Math.max(belowRightX, aboveRightX);
         this.points = [];
 
         switch (belowDirection) {
@@ -65,18 +67,20 @@ function Line(nodeA, directionA, nodeB, directionB) {
                 this.points.push(new Point(aboveCenterX, midY));
                 break;
             case DrawingLinePointDirection.LEFT:
-                if(belowCenterX > aboveLeftX){
+                if (belowCenterX > aboveLeftX) {
                     this.points.push(new Point(belowCenterX, midY));
                     this.points.push(new Point(aboveLeftX, midY));
                     this.points.push(new Point(aboveLeftX, aboveCenterY));
-                } else {
+                }
+                else {
                     this.points.push(new Point(belowCenterX, aboveCenterY));
                 }
                 break;
             case DrawingLinePointDirection.RIGHT:
-                if(belowCenterX > aboveLeftX){
+                if (belowCenterX > aboveLeftX) {
                     this.points.push(new Point(belowCenterX, aboveCenterY));
-                } else {
+                }
+                else {
                     this.points.push(new Point(belowCenterX, midY));
                     this.points.push(new Point(aboveRightX, midY));
                     this.points.push(new Point(aboveRightX, aboveCenterY));
@@ -102,11 +106,28 @@ function Line(nodeA, directionA, nodeB, directionB) {
         case DrawingLinePointDirection.LEFT:
             switch (aboveDirection) {
             case DrawingLinePointDirection.TOP:
+                if (aboveRightX < belowLeftX) {
+                    this.points.push(new Point(midX, belowCenterY));
+                    this.points.push(new Point(midX, aboveTopY));
+                    this.points.push(new Point(aboveCenterX, aboveTopY));
+                }
+                else {
+                    this.points.push(new Point(leftX, belowCenterY));
+                    this.points.push(new Point(leftX, aboveTopY));
+                    this.points.push(new Point(aboveCenterX, aboveTopY));
+                }
                 break;
             case DrawingLinePointDirection.BOTTOM:
+                if (belowLeftX < aboveCenterX) {
+                    this.points.push(new Point(belowLeftX, belowCenterY));
+                    this.points.push(new Point(belowLeftX, midY));
+                    this.points.push(new Point(aboveCenterX, midY));
+                }
+                else {
+                    this.points.push(new Point(aboveCenterX, belowCenterY));
+                }
                 break;
             case DrawingLinePointDirection.LEFT:
-                var leftX = Math.min(belowLeftX, aboveLeftX);
                 this.points.push(new Point(leftX, belowCenterY));
                 this.points.push(new Point(leftX, aboveCenterY));
                 break;
@@ -127,7 +148,6 @@ function Line(nodeA, directionA, nodeB, directionB) {
                 this.points.push(new Point(midX, aboveCenterY));
                 break;
             case DrawingLinePointDirection.RIGHT:
-                var rightX = Math.max(belowRightX, aboveRightX);
                 this.points.push(new Point(rightX, belowCenterY));
                 this.points.push(new Point(rightX, aboveCenterY));
                 break;
