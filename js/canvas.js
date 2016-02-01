@@ -23,13 +23,13 @@ function Canvas(canvasDOM) {
         return canvasStateMachine;
     };
 
-    this.addNode = function (image, x, y, width, height) {
+    this.addNode = function (drawable, x, y, width, height) {
         if (typeof x === 'undefined') {
             var position = this.getCurrentMousePosition();
             x = position.x;
             y = position.y;
         }
-        var node = new Node(image, x, y, width, height);
+        var node = new Node(drawable, x, y, width, height);
         nodes.push(node);
     };
 
@@ -39,6 +39,7 @@ function Canvas(canvasDOM) {
             console.log("can't get context of Canvas DOM.");
         }
         else {
+            ctx.setTransform(1, 0, 0, 1, 0, 0);
             ctx.clearRect(0, 0, canvasDOM.width, canvasDOM.height);
 
             for (var i in nodes) {

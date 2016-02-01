@@ -7,14 +7,31 @@ const DrawingLinePointDirection = {
     LEFT: 'left',
     RIGHT: 'right'
 };
+const DrawableType = {
+    IMG: 'IMG',
+    CANVAS_DRAWING_FUNCTION: 'function'
+};
 
-function Node(image, x, y, width, height) {
+function Node(drawable, x, y, width, height) {
     // constructor
-    this.image = image;
+
+    this.drawable = drawable;
+    if (typeof drawable === 'object' && drawable.tagName && drawable.tagName === 'IMG') {
+        this.drawableType = DrawableType.IMG;
+        this.image = this.drawable;
+        this.width = width || this.image.width;
+        this.height = height || this.image.height;
+    }
+    else if (typeof drawable === 'function') {
+        this.drawableType = DrawableType.CANVAS_DRAWING_FUNCTION;
+        this.width = width;
+        this.height = height;
+
+    }
     this.x = x;
     this.y = y;
-    this.width = width || image.width;
-    this.height = height || image.height;
+    var scaleX = 1;
+    var scaleY = 1;
 
     this.linesOfDirection = {};
     this.linesOfDirection[DrawingLinePointDirection.TOP] = [];
@@ -28,7 +45,18 @@ function Node(image, x, y, width, height) {
 
 
     this.onRender = function (ctx) {
-        ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+        switch (this.drawableType) {
+        case DrawableType.CANVAS_DRAWING_FUNCTION:
+            ctx.translate(this.x, this.y);
+            ctx.scale(scaleX, scaleY);
+            this.drawable(ctx);
+            ctx.scale(1 / scaleX, 1 / scaleY);
+            ctx.translate(-this.x, -this.y);
+            break;
+        case DrawableType.IMG:
+            ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
+            break;
+        }
         if (this.isFocus) {
             for (var direction in DrawingLinePointDirection) {
                 var position = this.getDrawingLinePointPosition(DrawingLinePointDirection[direction]);
@@ -43,6 +71,22 @@ function Node(image, x, y, width, height) {
                 }
             }
         }
+
+    };
+
+    this.getScaleX = function() {
+        return scaleX;
+    };
+    this.setScaleX = function(newScaleX) {
+        this.width = (this.width / scaleX) * newScaleX;
+        scaleX = newScaleX;
+    };
+    this.getScaleY = function() {
+        return scaleY;
+    };
+    this.setScaleY = function(newScaleY){
+        this.height = (this.height / scaleY) * newScaleY;
+        scaleY = newScaleY;
     };
 
     this.moveBy = function (dx, dy) {
@@ -121,23 +165,23 @@ function Node(image, x, y, width, height) {
         }
         return undefined;
     };
-    
-    this.getNearestDrawingLinePointDirection = function (x, y){
+
+    this.getNearestDrawingLinePointDirection = function (x, y) {
         var minDistanceSquare;
         var minDirection;
-        for(var i in DrawingLinePointDirection){
+        for (var i in DrawingLinePointDirection) {
             var direction = DrawingLinePointDirection[i];
             var position = this.getDrawingLinePointPosition(direction);
             var distanceSquare = (position.x - x) * (position.x - x) + (position.y - y) * (position.y - y);
-            if(!!!minDistanceSquare || distanceSquare < minDistanceSquare){
+            if (!!!minDistanceSquare || distanceSquare < minDistanceSquare) {
                 minDistanceSquare = distanceSquare;
                 minDirection = direction;
             }
         }
         return minDirection;
     };
-    
-    this.addLineofDirection = function(line, direction){
+
+    this.addLineofDirection = function (line, direction) {
         this.linesOfDirection[direction].push(line);
     };
 }
