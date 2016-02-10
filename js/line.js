@@ -327,10 +327,18 @@ function Line(nodeA, directionA, nodeB, directionB) {
                 break;
             case DrawingLinePointDirection.LEFT:
                 if (aboveLeftX < belowRightX) {
-                    this.points.push(new Point(belowRightX, belowMidY));
-                    this.points.push(new Point(belowRightX, midY));
-                    this.points.push(new Point(aboveLeftX, midY));
-                    this.points.push(new Point(aboveLeftX, aboveMidY));
+                    if (aboveBottomY > belowTopY) {
+                        this.points.push(new Point(belowRightX, belowMidY));
+                        this.points.push(new Point(belowRightX, aboveTopY));
+                        this.points.push(new Point(aboveLeftX, aboveTopY));
+                        this.points.push(new Point(aboveLeftX, aboveMidY));
+                    }
+                    else {
+                        this.points.push(new Point(belowRightX, belowMidY));
+                        this.points.push(new Point(belowRightX, midY));
+                        this.points.push(new Point(aboveLeftX, midY));
+                        this.points.push(new Point(aboveLeftX, aboveMidY));
+                    }
                 }
                 else {
                     this.points.push(new Point(midX, belowMidY));
@@ -338,8 +346,22 @@ function Line(nodeA, directionA, nodeB, directionB) {
                 }
                 break;
             case DrawingLinePointDirection.RIGHT:
-                this.points.push(new Point(rightX, belowMidY));
-                this.points.push(new Point(rightX, aboveMidY));
+                if (belowRightX < aboveLeftX && aboveBottomY > belowMidY) {
+                    this.points.push(new Point(midX, belowMidY));
+                    this.points.push(new Point(midX, aboveBottomY));
+                    this.points.push(new Point(aboveRightX, aboveBottomY));
+                    this.points.push(new Point(aboveRightX, aboveMidY));
+                }
+                else if (aboveRightX < belowLeftX  && aboveMidY > belowTopY) {
+                    this.points.push(new Point(belowRightX, belowMidY));
+                    this.points.push(new Point(belowRightX, belowTopY));
+                    this.points.push(new Point(midX, belowTopY));
+                    this.points.push(new Point(midX, aboveMidY));
+                }
+                else {
+                    this.points.push(new Point(rightX, belowMidY));
+                    this.points.push(new Point(rightX, aboveMidY));
+                }
                 break;
             }
             break;
