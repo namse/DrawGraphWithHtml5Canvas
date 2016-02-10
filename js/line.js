@@ -352,7 +352,7 @@ function Line(nodeA, directionA, nodeB, directionB) {
                     this.points.push(new Point(aboveRightX, aboveBottomY));
                     this.points.push(new Point(aboveRightX, aboveMidY));
                 }
-                else if (aboveRightX < belowLeftX  && aboveMidY > belowTopY) {
+                else if (aboveRightX < belowLeftX && aboveMidY > belowTopY) {
                     this.points.push(new Point(belowRightX, belowMidY));
                     this.points.push(new Point(belowRightX, belowTopY));
                     this.points.push(new Point(midX, belowTopY));
@@ -383,6 +383,36 @@ function Line(nodeA, directionA, nodeB, directionB) {
             ctx.lineTo(point.x, point.y);
         }
         ctx.lineTo(aboveNodeStartPosition.x, aboveNodeStartPosition.y);
+
+        // 화살표 그리기
+        var pointLength = this.points.length;
+        if (pointLength > 0) {
+            var lastPointIndex;
+            if (aboveNode == nodeB) {
+                lastPointIndex = this.points.length - 1;
+            }
+            else {
+                lastPointIndex = 0;
+            }
+            var lastPoint = this.points[lastPointIndex];
+            var nodeBStartPosition = nodeB.getLineStartPosition(directionB);
+            drawArrow(ctx, lastPoint.x, lastPoint.y, nodeBStartPosition.x, nodeBStartPosition.y);
+        }
+
         ctx.stroke();
     };
+
+
+    //http://stackoverflow.com/questions/808826/draw-arrow-on-canvas-tag#answer-6333775
+    function drawArrow(context, fromx, fromy, tox, toy) {
+        var headlen = 10; // length of head in pixels
+        var angle = Math.atan2(toy - fromy, tox - fromx);
+        context.moveTo(fromx, fromy);
+        context.lineTo(tox, toy);
+        context.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
+        context.moveTo(tox, toy);
+        context.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
+        context.lineTo(tox, toy)
+    }
+
 }
