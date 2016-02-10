@@ -137,6 +137,35 @@ function Node(drawable, x, y, width, height) {
         return false;
     };
 
+    this.getLineStartPosition = function (drawingLinePointDirection) {
+        var radius = DrawingLinePointRadius;
+        if (drawingLinePointDirection === DrawingLinePointDirection.LEFT) {
+            return {
+                x: this.x,
+                y: this.y + (this.height) / 2
+            };
+        }
+        else if (drawingLinePointDirection === DrawingLinePointDirection.RIGHT) {
+            return {
+                x: this.x + this.width,
+                y: this.y + (this.height) / 2
+            };
+        }
+        else if (drawingLinePointDirection === DrawingLinePointDirection.TOP) {
+            return {
+                x: this.x + (this.width) / 2,
+                y: this.y
+            };
+        }
+        else if (drawingLinePointDirection === DrawingLinePointDirection.BOTTOM) {
+            return {
+                x: this.x + (this.width) / 2,
+                y: this.y + this.height
+            };
+        }
+        return undefined;
+    };
+
     this.getDrawingLinePointPosition = function (drawingLinePointDirection) {
         var radius = DrawingLinePointRadius;
         if (drawingLinePointDirection === DrawingLinePointDirection.LEFT) {

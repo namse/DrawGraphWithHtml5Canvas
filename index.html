@@ -5,15 +5,31 @@
 <head>
     <meta charset="utf-8">
     <title>SCE Drawing</title>
+    <link rel='stylesheet' href='css/index.css'>
     <script src="lib/jquery-2.2.0.min.js"></script>
 </head>
 <body>
-    <div id="canvasContainer">
-        <canvas id="canvas" width="500" height="500" style="border:1px solid #d3d3d3;">
-            Your browser does not support the HTML5 canvas tag.</canvas>
+    <!-- drag 관련 셋팅 http://www.w3schools.com/html/html5_draganddrop.asp -->
+    <div id="drawableList">
+        <div class="drawableContainer">
+            <canvas id="drawable-1" draggable="true" ondragstart="drag(event)" width="100" height="100" style="border:1px solid #000000;"></canvas>
+        </div>
+        <div class="drawableContainer">
+            <canvas id="drawable-2" draggable="true" ondragstart="drag(event)" width="100" height="100" style="border:1px solid #000000;"></canvas>
+        </div>
+        <div class="drawableContainer">
+            <canvas id="drawable-3" draggable="true" ondragstart="drag(event)" width="100" height="100" style="border:1px solid #000000;"></canvas>
+        </div>
+        <div class="drawableContainer">
+            <canvas id="drawable-4" draggable="true" ondragstart="drag(event)" width="100" height="100" style="border:1px solid #000000;"></canvas>
+        </div>
     </div>
     
-    <img src="cute-cat-1.jpg" id="img" width="50" height="50">
+    <div id="canvasContainer" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <canvas id="canvasModule" width="500" height="500" style="border:1px solid #d3d3d3;"></canvas>
+    </div>
+    
+    <!-- img src="cute-cat-1.jpg" id="img" width="50" height="50" -->
 
     <script src="js/point.js"></script>
     <script src="js/line.js"></script>

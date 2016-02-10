@@ -1,0 +1,15 @@
+body div {
+    display: inline-block;
+}
+
+#drawableList {
+    width: 100px;
+    height: 400px;
+}
+
+.drawableContainer {
+    width: 100px;
+    height: 100px;
+}
+
+#canvasContainer {}
