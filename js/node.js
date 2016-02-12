@@ -2,11 +2,18 @@
 
 const DrawingLinePointRadius = 4;
 const DrawingLinePointDirection = {
-    TOP: 'top',
-    BOTTOM: 'bottom',
-    LEFT: 'left',
-    RIGHT: 'right'
+    TOP: 'TOP',
+    RIGHT: 'RIGHT',
+    BOTTOM: 'BOTTOM',
+    LEFT: 'LEFT'
 };
+const ScalingPointDirection = {
+    TOP_RIGHT: 'TOP_RIGHT',
+    BOTTOM_RIGHT: 'BOTTOM_RIGHT',
+    BOTTOM_LEFT: 'BOTTOM_LEFT',
+    TOP_LEFT: 'TOP_LEFT'
+};
+
 const DrawableType = {
     IMG: 'IMG',
     CANVAS_DRAWING_FUNCTION: 'function'
@@ -74,17 +81,17 @@ function Node(drawable, x, y, width, height) {
 
     };
 
-    this.getScaleX = function() {
+    this.getScaleX = function () {
         return scaleX;
     };
-    this.setScaleX = function(newScaleX) {
+    this.setScaleX = function (newScaleX) {
         this.width = (this.width / scaleX) * newScaleX;
         scaleX = newScaleX;
     };
-    this.getScaleY = function() {
+    this.getScaleY = function () {
         return scaleY;
     };
-    this.setScaleY = function(newScaleY){
+    this.setScaleY = function (newScaleY) {
         this.height = (this.height / scaleY) * newScaleY;
         scaleY = newScaleY;
     };
@@ -201,6 +208,47 @@ function Node(drawable, x, y, width, height) {
         for (var i in DrawingLinePointDirection) {
             var direction = DrawingLinePointDirection[i];
             var position = this.getDrawingLinePointPosition(direction);
+            var distanceSquare = (position.x - x) * (position.x - x) + (position.y - y) * (position.y - y);
+            if (!!!minDistanceSquare || distanceSquare < minDistanceSquare) {
+                minDistanceSquare = distanceSquare;
+                minDirection = direction;
+            }
+        }
+        return minDirection;
+    };
+
+    // SCALING
+    this.getScalingPointPosition = function (scalingPointDirection) {
+        switch (scalingPointDirection) {
+        case ScalingPointDirection.TOP_RIGHT:
+            return {
+                x: this.x + this.width,
+                y: this.y
+            };
+        case ScalingPointDirection.BOTTOM_RIGHT:
+            return {
+                x: this.x + this.width,
+                y: this.y + this.height
+            };
+        case ScalingPointDirection.BOTTOM_LEFT:
+            return {
+                x: this.x,
+                y: this.y + this.height
+            };
+        case ScalingPointDirection.TOP_LEFT:
+            return {
+                x: this.x,
+                y: this.y
+            };
+        }
+    };
+
+    this.getNearestScalingPointDirection = function (x, y) {
+        var minDistanceSquare;
+        var minDirection;
+        for (var i in ScalingPointDirection) {
+            var direction = ScalingPointDirection[i];
+            var position = this.getScalingPointPosition(direction);
             var distanceSquare = (position.x - x) * (position.x - x) + (position.y - y) * (position.y - y);
             if (!!!minDistanceSquare || distanceSquare < minDistanceSquare) {
                 minDistanceSquare = distanceSquare;
