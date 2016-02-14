@@ -2,6 +2,20 @@
 /* global DrawingLinePointDirection */
 /* global Point */
 
+var isCurve = false;
+
+function onKeyUp(e) {
+
+    // this would test for whichever key is 40 and the ctrl key at the same time
+    if (e.keyCode == 67) {
+        // call your function to do the thing
+        isCurve = !isCurve;
+    }
+    console.log(isCurve);
+}
+// register the handler 
+document.addEventListener('keyup', onKeyUp, false);
+
 function Line(nodeA, directionA, nodeB, directionB) {
 
     this.nodeA = nodeA;
@@ -9,8 +23,10 @@ function Line(nodeA, directionA, nodeB, directionB) {
     this.nodeB = nodeB;
     this.directionB = directionB;
     this.points = []; // below -> above
-    this.isCurve = true;
+
     var belowNode, belowDirection, aboveNode, aboveDirection;
+
+
 
     this.calculateDrawingPoints = function () { // direction for drawingLinePointDirection
         const LEAST_GAP = 10;
@@ -376,11 +392,11 @@ function Line(nodeA, directionA, nodeB, directionB) {
         var belowNodeStartPosition = belowNode.getLineStartPosition(belowDirection);
         var aboveNodeStartPosition = aboveNode.getLineStartPosition(aboveDirection);
 
-        if (this.isCurve) {
+        if (isCurve) {
             // move to the first point
             ctx.moveTo(belowNodeStartPosition.x, belowNodeStartPosition.y);
 
-            for (i = 0; i < this.points.length-1; i++) {
+            for (i = 0; i < this.points.length - 1; i++) {
                 var xc = (this.points[i].x + this.points[i + 1].x) / 2;
                 var yc = (this.points[i].y + this.points[i + 1].y) / 2;
                 ctx.quadraticCurveTo(this.points[i].x, this.points[i].y, xc, yc);

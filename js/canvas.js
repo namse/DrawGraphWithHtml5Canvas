@@ -177,14 +177,24 @@ function Canvas(canvasDOM) {
         findNodeInBound(function (err, node) {
             if (!!!err) {
                 focusUpdate(node);
-                return callback(null, node);
+                if (!!callback) {
+                    return callback(null, node);
+                }
+                else {
+                    return;
+                }
             }
             else {
                 if (focusedNode) {
                     focusedNode.focusOff();
                 }
                 focusedNode = null;
-                return callback(err);
+                if (!!callback) {
+                    return callback(err);
+                }
+                else {
+                    return;
+                }
             }
         });
     }

@@ -106,7 +106,6 @@ $(window).load(function () {
     // 그리기를 시작합니다.
     var drawFrame = function () {
         canvas.onRender();
-        console.log(canvas.getCurrentMousePosition());
         setTimeout(drawFrame, 1);
     };
     drawFrame();
