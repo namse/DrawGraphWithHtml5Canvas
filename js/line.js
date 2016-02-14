@@ -395,24 +395,22 @@ function Line(nodeA, directionA, nodeB, directionB) {
                 ctx.lineTo(point.x, point.y);
             }
             ctx.lineTo(aboveNodeStartPosition.x, aboveNodeStartPosition.y);
-        }
 
-
-        // 화살표 그리기
-        var pointLength = this.points.length;
-        if (pointLength > 0) {
-            var lastPointIndex;
-            if (aboveNode == nodeB) {
-                lastPointIndex = this.points.length - 1;
+            // 화살표 그리기
+            var pointLength = this.points.length;
+            if (pointLength > 0) {
+                var lastPointIndex;
+                if (aboveNode == nodeB) {
+                    lastPointIndex = this.points.length - 1;
+                }
+                else {
+                    lastPointIndex = 0;
+                }
+                var lastPoint = this.points[lastPointIndex];
+                var nodeBStartPosition = nodeB.getLineStartPosition(directionB);
+                drawArrow(ctx, lastPoint.x, lastPoint.y, nodeBStartPosition.x, nodeBStartPosition.y);
             }
-            else {
-                lastPointIndex = 0;
-            }
-            var lastPoint = this.points[lastPointIndex];
-            var nodeBStartPosition = nodeB.getLineStartPosition(directionB);
-            drawArrow(ctx, lastPoint.x, lastPoint.y, nodeBStartPosition.x, nodeBStartPosition.y);
         }
-
         ctx.stroke();
     };
 

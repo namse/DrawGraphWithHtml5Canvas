@@ -5,7 +5,6 @@
 function Canvas(canvasDOM) {
     this.canvasDOM = canvasDOM;
     var nodes = [];
-    var nodes = [];
     var lines = [];
     var CanvasState = {
         IDLE: 0,
@@ -71,14 +70,16 @@ function Canvas(canvasDOM) {
         updateMousePosition(e);
         switch (canvasStateMachine) {
         case CanvasState.IDLE:
-            findNodeAndFocus().then(function (node) {
-                clickedNodeDrawingLinePointDirection = node.isInDrawingLinePointBound(mouseX, mouseY); // false of Direction
-                console.log(clickedNodeDrawingLinePointDirection);
-                if (clickedNodeDrawingLinePointDirection) {
-                    canvasStateMachine = CanvasState.DRAWING_LINE_POINT_CLICKED;
-                }
-                else {
-                    canvasStateMachine = CanvasState.NODE_CLICKED;
+            findNodeAndFocus(function (err, node) {
+                if (!!!err) {
+                    clickedNodeDrawingLinePointDirection = node.isInDrawingLinePointBound(mouseX, mouseY); // false of Direction
+                    console.log(clickedNodeDrawingLinePointDirection);
+                    if (clickedNodeDrawingLinePointDirection) {
+                        canvasStateMachine = CanvasState.DRAWING_LINE_POINT_CLICKED;
+                    }
+                    else {
+                        canvasStateMachine = CanvasState.NODE_CLICKED;
+                    }
                 }
             });
             break;
@@ -96,25 +97,30 @@ function Canvas(canvasDOM) {
             var end = function () {
                 canvasStateMachine = CanvasState.IDLE;
                 temporaryLine = null;
-            }
-            findNodeInBound().then(function (node) {
-                if (node != focusedNode) {
-                    // focusedNode -> node 로 선을 그어줘야 함.
-                    // 현재 마우스 포인터로 부터 node의 가장 가까운 DrawingLinePoint를 찾아야 함.
-                    var direction = node.getNearestDrawingLinePointDirection(mouseX, mouseY);
-                    var newLine = new Line(focusedNode, clickedNodeDrawingLinePointDirection, node, direction);
-
-                    focusedNode.addLineofDirection(newLine, clickedNodeDrawingLinePointDirection);
-                    node.addLineofDirection(newLine, direction);
-                    lines.push(newLine);
-                    console.log(newLine);
+            };
+            findNodeInBound(function (err, node) {
+                if (!!err) {
+                    return end();
                 }
                 else {
-                    // 자기가 자신에게 선을 그을 수 있으려면(circular)
-                    // 여기서 선을 처리하면 됨.
+                    if (node != focusedNode) {
+                        // focusedNode -> node 로 선을 그어줘야 함.
+                        // 현재 마우스 포인터로 부터 node의 가장 가까운 DrawingLinePoint를 찾아야 함.
+                        var direction = node.getNearestDrawingLinePointDirection(mouseX, mouseY);
+                        var newLine = new Line(focusedNode, clickedNodeDrawingLinePointDirection, node, direction);
+
+                        focusedNode.addLineofDirection(newLine, clickedNodeDrawingLinePointDirection);
+                        node.addLineofDirection(newLine, direction);
+                        lines.push(newLine);
+                        console.log(newLine);
+                    }
+                    else {
+                        // 자기가 자신에게 선을 그을 수 있으려면(circular)
+                        // 여기서 선을 처리하면 됨.
+                    }
+                    return end();
                 }
-                end();
-            }).catch(function () {end()});
+            });
             break;
         }
     }).mousemove(function (e) {
@@ -136,19 +142,18 @@ function Canvas(canvasDOM) {
             break;
         case CanvasState.DRAWING_LINE_POINT_CLICKED:
 
-            findNodeInBound().then(function (node) {
-                // 현재 마우스 위에 원래 클릭한 노드 말고 다른 노드가 있는지 확인
-                if (node != focusedNode) {
-                    // 현재 마우스 포인터로부터 가장 가까운 DrawingLinePoint를 찾는다.
-                    var direction = node.getNearestDrawingLinePointDirection(mouseX, mouseY);
+            findNodeInBound(function (err, node) {
+                if (!!!err) {
+                    // 현재 마우스 위에 원래 클릭한 노드 말고 다른 노드가 있는지 확인
+                    if (node != focusedNode) {
+                        // 현재 마우스 포인터로부터 가장 가까운 DrawingLinePoint를 찾는다.
+                        var direction = node.getNearestDrawingLinePointDirection(mouseX, mouseY);
 
-                    // 미리 선을 보여줘본다.
-                    temporaryLine = new Line(focusedNode, clickedNodeDrawingLinePointDirection, node, direction);
-                    // don't push temporaryLine to lines
+                        // 미리 선을 보여줘본다.
+                        temporaryLine = new Line(focusedNode, clickedNodeDrawingLinePointDirection, node, direction);
+                        // don't push temporaryLine to lines
+                    }
                 }
-            }).catch(function () {
-                // 못찾은 경우.
-                // 마우스를 목표점 삼아 선을 그린다.
             });
             break;
         }
@@ -168,33 +173,32 @@ function Canvas(canvasDOM) {
         mouseY = e.pageY - canvasDOM.offsetTop;
     }
 
-    function findNodeAndFocus() {
-        return new Promise(function (resolve, reject) { // resolve (node)
-            findNodeInBound().then(function (node) {
+    function findNodeAndFocus(callback) { // callback(err, node)
+        findNodeInBound(function (err, node) {
+            if (!!!err) {
                 focusUpdate(node);
-                return resolve(node);
-            }).catch(function () {
+                return callback(null, node);
+            }
+            else {
                 if (focusedNode) {
                     focusedNode.focusOff();
                 }
                 focusedNode = null;
-                return;
-            });
+                return callback(err);
+            }
         });
     }
 
-    function findNodeInBound() {
-        return new Promise(function (resolve, reject) { // resolve (node)
-            for (var i in nodes) {
-                if (nodes[i] instanceof Node) {
-                    var node = nodes[i];
-                    if (node.isInBound(mouseX, mouseY)) {
-                        return resolve(node);
-                    }
+    function findNodeInBound(callback) { // callback(err, node)
+        for (var i in nodes) {
+            if (nodes[i] instanceof Node) {
+                var node = nodes[i];
+                if (node.isInBound(mouseX, mouseY)) {
+                    return callback(null, node);
                 }
             }
-            return reject("can't find node");
-        });
+        }
+        callback("can't find node", node);
     }
 
     function focusUpdate(node) {

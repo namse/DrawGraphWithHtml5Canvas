@@ -178,16 +178,21 @@ function allowDrop(ev) {
 }
 
 function drag(ev) {
-    ev.dataTransfer.setData("drawableID", ev.target.id);
+    ev.dataTransfer.setData("text", ev.target.id);
 }
 
 function drop(ev) {
     ev.preventDefault();
-    var drawableID = ev.dataTransfer.getData("drawableID");
+    var drawableID = ev.dataTransfer.getData("text");
     var drawableObject = drawableObjectTable[drawableID];
 
-    var positionX = ev.clientX - canvas.canvasDOM.offsetLeft;
-    var positionY = ev.clientY - canvas.canvasDOM.offsetTop;
+
+    var boundingClientRect = $('#canvasModule')[0].getBoundingClientRect();
+    var canvasTop = boundingClientRect.top;
+    var canvasLeft = boundingClientRect.left;
+
+    var positionX = parseInt(event.clientX - canvasLeft - drawableObject.width/2);
+    var positionY = parseInt(event.clientY - canvasTop - drawableObject.height/2);
 
     canvas.addNode(drawableObject.drawFunction, positionX, positionY, drawableObject.width, drawableObject.height);
 }
