@@ -2,14 +2,17 @@
 /* global DrawingLinePointDirection */
 /* global Line */
 /* global Point */
+
+
 function Canvas(canvasDOM) {
     this.canvasDOM = canvasDOM;
     var nodes = [];
     var lines = [];
     var CanvasState = {
-        IDLE: 0,
-        NODE_CLICKED: 1,
-        DRAWING_LINE_POINT_CLICKED: 2
+        IDLE: 'IDLE',
+        NODE_CLICKED: 'NODE_CLICKED',
+        DRAWING_LINE_POINT_CLICKED: 'DRAWING_LINE_POINT_CLICKED',
+        LINE_CLICKED: 'LINE_CLICKED'
     };
     var canvasStateMachine = CanvasState.IDLE;
     var mouseX;
@@ -17,6 +20,16 @@ function Canvas(canvasDOM) {
     var focusedNode;
     var clickedNodeDrawingLinePointDirection;
     var temporaryLine;
+    var focusedLine;
+
+    function onKeyUp(e) {
+        if (e.keyCode == 78 && canvasStateMachine == CanvasState.LINE_CLICKED) {
+            var title = prompt("input line's text");
+            focusedLine.title = title || '';
+        }
+    }
+    // register the handler 
+    document.addEventListener('keyup', onKeyUp, false);
 
     this.getCanvasStateMachine = function () {
         return canvasStateMachine;
@@ -45,7 +58,13 @@ function Canvas(canvasDOM) {
             ctx.clearRect(0, 0, canvasDOM.width, canvasDOM.height);
 
             for (var i in lines) {
-                lines[i].onRender(ctx);
+                var line = lines[i];
+                if (line == focusedLine) {
+                    line.onRender(ctx, 'red');
+                }
+                else {
+                    line.onRender(ctx);
+                }
             }
             if (temporaryLine) {
                 temporaryLine.onRender(ctx);
@@ -69,6 +88,7 @@ function Canvas(canvasDOM) {
         console.log('down');
         updateMousePosition(e);
         switch (canvasStateMachine) {
+        case CanvasState.LINE_CLICKED:
         case CanvasState.IDLE:
             findNodeAndFocus(function (err, node) {
                 if (!!!err) {
@@ -80,6 +100,17 @@ function Canvas(canvasDOM) {
                     else {
                         canvasStateMachine = CanvasState.NODE_CLICKED;
                     }
+                }
+                else {
+                    findLine(function (err, line) {
+                        if (!!!err) {
+                            focusedLine = line;
+                            canvasStateMachine = CanvasState.LINE_CLICKED;
+                        }
+                        else {
+                            canvasStateMachine = CanvasState.IDLE;
+                        }
+                    });
                 }
             });
             break;
@@ -156,6 +187,17 @@ function Canvas(canvasDOM) {
                 }
             });
             break;
+        case CanvasState.LINE_CLICKED:
+            findLine(function (err, line) {
+                if (!!!err) {
+                    focusedLine = line;
+                }
+                else {
+                    focusedLine = null;
+                    canvasStateMachine = CanvasState.IDLE;
+                }
+            });
+            break;
         }
     }).mouseenter(function (e) {
         console.log('enter');
@@ -208,7 +250,7 @@ function Canvas(canvasDOM) {
                 }
             }
         }
-        callback("can't find node", node);
+        return callback("can't find node");
     }
 
     function focusUpdate(node) {
@@ -219,5 +261,17 @@ function Canvas(canvasDOM) {
         if (node) {
             node.focusOn();
         }
+    }
+
+    function findLine(callback) { // callback(err, line)
+        for (var i in lines) {
+            if (lines[i] instanceof(Line)) {
+                var line = lines[i];
+                if (line.isPointOnLine(new Point(mouseX, mouseY))) {
+                    return callback(null, line);
+                }
+            }
+        }
+        return callback("can't find line");
     }
 }

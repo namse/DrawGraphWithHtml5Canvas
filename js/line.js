@@ -23,7 +23,9 @@ function Line(nodeA, directionA, nodeB, directionB) {
     this.nodeB = nodeB;
     this.directionB = directionB;
     this.points = []; // below -> above
-    this.title = 'abc';
+    this.title = '';
+
+    var lineWidth = 2;
 
     var belowNode, belowDirection, aboveNode, aboveDirection;
 
@@ -385,11 +387,11 @@ function Line(nodeA, directionA, nodeB, directionB) {
     };
     this.calculateDrawingPoints();
 
-    this.onRender = function (ctx) {
+    this.onRender = function (ctx, strokeStyle) {
         this.calculateDrawingPoints();
         ctx.beginPath();
-        ctx.lineWidth = 2;
-        ctx.strokeStyle = "black";
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = strokeStyle || "black";
         var belowNodeStartPosition = belowNode.getLineStartPosition(belowDirection);
         var aboveNodeStartPosition = aboveNode.getLineStartPosition(aboveDirection);
 
@@ -434,16 +436,19 @@ function Line(nodeA, directionA, nodeB, directionB) {
             var centerPointIndex = parseInt((this.points.length - 1) / 2);
             var centerPoint = this.points[centerPointIndex];
             var textAlign;
-            
+
             if (this.points.length == 1) {
                 textAlign = 'left';
-            } else {
+            }
+            else {
                 var nextPoint = this.points[centerPointIndex + 1];
-                if(nextPoint.y == centerPoint.y){
+                if (nextPoint.y == centerPoint.y) {
                     textAlign = 'center';
-                } else if(nextPoint.x == centerPoint.x){
+                }
+                else if (nextPoint.x == centerPoint.x) {
                     textAlign = 'left';
-                } else {
+                }
+                else {
                     textAlign = 'center';
                 }
                 centerPoint.x += (nextPoint.x - centerPoint.x) / 2;
@@ -471,4 +476,55 @@ function Line(nodeA, directionA, nodeB, directionB) {
         context.lineTo(tox, toy);
     }
 
+
+    this.isPointOnLine = function (point) {
+        this.calculateDrawingPoints();
+        if (isCurve) {
+            return false;
+        }
+
+        var test = function (linePointA, linePointB, testPoint) {
+            var leftTopPoint;
+            var rightBottomPoint;
+            if (linePointA.x == linePointB.x) {
+                var linePointX = linePointA.x; // is same with linePointB.x
+                leftTopPoint = new Point(linePointX - lineWidth, Math.min(linePointA.y, linePointB.y));
+                rightBottomPoint = new Point(linePointX + lineWidth, Math.max(linePointA.y, linePointB.y));
+            }
+            else if (linePointA.y == linePointB.y) {
+                var linePointY = linePointA.y; // is same with linePointB.x
+                leftTopPoint = new Point(Math.min(linePointA.x, linePointB.x), linePointY - lineWidth);
+                rightBottomPoint = new Point(Math.max(linePointA.x, linePointB.x), linePointY + lineWidth);
+            }
+            else {
+                leftTopPoint = new Point(Math.min(linePointA.x, linePointB.x), Math.min(linePointA.y, linePointB.y));
+                rightBottomPoint = new Point(Math.max(linePointA.x, linePointB.x), Math.max(linePointA.y, linePointB.y));
+            }
+            if (leftTopPoint.x <= testPoint.x && testPoint.x <= rightBottomPoint.x && leftTopPoint.y <= testPoint.y && testPoint.y <= rightBottomPoint.y) {
+                return true;
+            }
+            else {
+                return false;
+            }
+        };
+
+        var belowNodeStartPosition = belowNode.getLineStartPosition(belowDirection);
+        var aboveNodeStartPosition = aboveNode.getLineStartPosition(aboveDirection);
+
+        var linePointA, linePointB;
+        linePointA = belowNodeStartPosition;
+        for (var i in this.points) {
+            linePointB = this.points[i];
+            if (test(linePointA, linePointB, point) == true) {
+                return true;
+            }
+            linePointA = this.points[i];
+        }
+        linePointB = aboveNodeStartPosition;
+        if (test(linePointA, linePointB, point) == true) {
+            return true;
+        }
+
+        return false;
+    };
 }
