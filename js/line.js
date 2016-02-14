@@ -23,6 +23,7 @@ function Line(nodeA, directionA, nodeB, directionB) {
     this.nodeB = nodeB;
     this.directionB = directionB;
     this.points = []; // below -> above
+    this.title = 'abc';
 
     var belowNode, belowDirection, aboveNode, aboveDirection;
 
@@ -427,6 +428,34 @@ function Line(nodeA, directionA, nodeB, directionB) {
                 drawArrow(ctx, lastPoint.x, lastPoint.y, nodeBStartPosition.x, nodeBStartPosition.y);
             }
         }
+
+        // title text
+        if (this.points.length > 0) {
+            var centerPointIndex = parseInt((this.points.length - 1) / 2);
+            var centerPoint = this.points[centerPointIndex];
+            var textAlign;
+            
+            if (this.points.length == 1) {
+                textAlign = 'left';
+            } else {
+                var nextPoint = this.points[centerPointIndex + 1];
+                if(nextPoint.y == centerPoint.y){
+                    textAlign = 'center';
+                } else if(nextPoint.x == centerPoint.x){
+                    textAlign = 'left';
+                } else {
+                    textAlign = 'center';
+                }
+                centerPoint.x += (nextPoint.x - centerPoint.x) / 2;
+                centerPoint.y += (nextPoint.y - centerPoint.y) / 2;
+            }
+
+            ctx.fillStyle = "black";
+            ctx.font = '15px Arial';
+            ctx.textAlign = textAlign;
+            ctx.fillText(this.title, centerPoint.x + 2, centerPoint.y - 2);
+        }
+
         ctx.stroke();
     };
 
