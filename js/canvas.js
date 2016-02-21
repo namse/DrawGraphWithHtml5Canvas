@@ -23,12 +23,14 @@ function Canvas(canvasDOM) {
     var focusedLine;
     var clickedNodes = [];
     var isCtrlKeyPressed = false;
-    function onKeyDown(e){
+
+    function onKeyDown(e) {
         // 17 == ctrl
-        if(e.keyCode == 17){
+        if (e.keyCode == 17) {
             isCtrlKeyPressed = true;
         }
     }
+
     function onKeyUp(e) {
         // 78 == n
         if (e.keyCode == 78 && canvasStateMachine == CanvasState.LINE_CLICKED) {
@@ -37,7 +39,7 @@ function Canvas(canvasDOM) {
         }
 
         // 68 == d
-        if (e.keyCode == 68) {
+        else if (e.keyCode == 68) {
             switch (canvasStateMachine) {
             case CanvasState.LINE_CLICKED:
 
@@ -47,10 +49,15 @@ function Canvas(canvasDOM) {
             default:
             }
         }
-        
+
         // 17 == ctrl
-        if(e.keyCode == 17){
+        else if (e.keyCode == 17) {
             isCtrlKeyPressed = false;
+        }
+
+        // 46 == delete
+        else if (e.keyCode == 46) {
+            removeClickedNodes();
         }
     }
     // register the handler 
@@ -99,10 +106,10 @@ function Canvas(canvasDOM) {
                 var node = nodes[i];
                 var isFocus = false;
                 var isClicked = false;
-                if(node == focusedNode){
+                if (node == focusedNode) {
                     isFocus = true;
                 }
-                if(clickedNodes.indexOf(node) != -1){
+                if (clickedNodes.indexOf(node) != -1) {
                     isClicked = true;
                 }
                 node.onRender(ctx, isFocus, isClicked);
@@ -127,8 +134,8 @@ function Canvas(canvasDOM) {
         case CanvasState.IDLE:
             findNodeAndFocus(function (err, node) {
                 if (!!!err) {
-                    if(clickedNodes.indexOf(node) == -1){
-                        if(isCtrlKeyPressed == false){
+                    if (clickedNodes.indexOf(node) == -1) {
+                        if (isCtrlKeyPressed == false) {
                             clickedNodes = [];
                         }
                         clickedNodes.push(node);
@@ -308,5 +315,15 @@ function Canvas(canvasDOM) {
         nodeB.addLineofDirection(newLine, directionB);
         lines.push(newLine);
         console.log('add line : ' + newLine);
+    }
+
+    function removeClickedNodes() {
+        for(var i in clickedNodes){
+            var clickedNode = clickedNodes[i];
+            var index = nodes.indexOf(clickedNode);
+            if (index > -1) {
+                nodes.splice(index, 1);
+            }
+        }
     }
 }
