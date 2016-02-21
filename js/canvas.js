@@ -21,14 +21,40 @@ function Canvas(canvasDOM) {
     var clickedNodeDrawingLinePointDirection;
     var temporaryLine;
     var focusedLine;
-
+    var clickedNodes = [];
+    var isCtrlKeyPressed = false;
+    function onKeyDown(e){
+        // 17 == ctrl
+        if(e.keyCode == 17){
+            isCtrlKeyPressed = true;
+        }
+    }
     function onKeyUp(e) {
+        // 78 == n
         if (e.keyCode == 78 && canvasStateMachine == CanvasState.LINE_CLICKED) {
-            var title = prompt("input line's text");
+            var title = prompt("input line's text", '');
             focusedLine.title = title || '';
+        }
+
+        // 68 == d
+        if (e.keyCode == 68) {
+            switch (canvasStateMachine) {
+            case CanvasState.LINE_CLICKED:
+
+                break;
+            case CanvasState.NODE_CLICKED:
+                break;
+            default:
+            }
+        }
+        
+        // 17 == ctrl
+        if(e.keyCode == 17){
+            isCtrlKeyPressed = false;
         }
     }
     // register the handler 
+    document.addEventListener('keydown', onKeyDown, false);
     document.addEventListener('keyup', onKeyUp, false);
 
     this.getCanvasStateMachine = function () {
@@ -70,7 +96,16 @@ function Canvas(canvasDOM) {
                 temporaryLine.onRender(ctx);
             }
             for (var i in nodes) {
-                nodes[i].onRender(ctx);
+                var node = nodes[i];
+                var isFocus = false;
+                var isClicked = false;
+                if(node == focusedNode){
+                    isFocus = true;
+                }
+                if(clickedNodes.indexOf(node) != -1){
+                    isClicked = true;
+                }
+                node.onRender(ctx, isFocus, isClicked);
             }
         }
     };
@@ -92,6 +127,12 @@ function Canvas(canvasDOM) {
         case CanvasState.IDLE:
             findNodeAndFocus(function (err, node) {
                 if (!!!err) {
+                    if(clickedNodes.indexOf(node) == -1){
+                        if(isCtrlKeyPressed == false){
+                            clickedNodes = [];
+                        }
+                        clickedNodes.push(node);
+                    }
                     clickedNodeDrawingLinePointDirection = node.isInDrawingLinePointBound(mouseX, mouseY); // false of Direction
                     console.log(clickedNodeDrawingLinePointDirection);
                     if (clickedNodeDrawingLinePointDirection) {
@@ -109,6 +150,7 @@ function Canvas(canvasDOM) {
                         }
                         else {
                             canvasStateMachine = CanvasState.IDLE;
+                            clickedNodes = [];
                         }
                     });
                 }
@@ -138,12 +180,7 @@ function Canvas(canvasDOM) {
                         // focusedNode -> node 로 선을 그어줘야 함.
                         // 현재 마우스 포인터로 부터 node의 가장 가까운 DrawingLinePoint를 찾아야 함.
                         var direction = node.getNearestDrawingLinePointDirection(mouseX, mouseY);
-                        var newLine = new Line(focusedNode, clickedNodeDrawingLinePointDirection, node, direction);
-
-                        focusedNode.addLineofDirection(newLine, clickedNodeDrawingLinePointDirection);
-                        node.addLineofDirection(newLine, direction);
-                        lines.push(newLine);
-                        console.log(newLine);
+                        addLine(focusedNode, clickedNodeDrawingLinePointDirection, node, direction);
                     }
                     else {
                         // 자기가 자신에게 선을 그을 수 있으려면(circular)
@@ -220,23 +257,16 @@ function Canvas(canvasDOM) {
             if (!!!err) {
                 focusUpdate(node);
                 if (!!callback) {
-                    return callback(null, node);
+                    callback(null, node);
                 }
-                else {
-                    return;
-                }
+                return;
             }
             else {
-                if (focusedNode) {
-                    focusedNode.focusOff();
-                }
                 focusedNode = null;
                 if (!!callback) {
-                    return callback(err);
+                    callback(err);
                 }
-                else {
-                    return;
-                }
+                return;
             }
         });
     }
@@ -246,7 +276,8 @@ function Canvas(canvasDOM) {
             if (nodes[i] instanceof Node) {
                 var node = nodes[i];
                 if (node.isInBound(mouseX, mouseY)) {
-                    return callback(null, node);
+                    callback(null, node);
+                    return;
                 }
             }
         }
@@ -254,13 +285,7 @@ function Canvas(canvasDOM) {
     }
 
     function focusUpdate(node) {
-        if (focusedNode) {
-            focusedNode.focusOff();
-        }
         focusedNode = node;
-        if (node) {
-            node.focusOn();
-        }
     }
 
     function findLine(callback) { // callback(err, line)
@@ -268,10 +293,20 @@ function Canvas(canvasDOM) {
             if (lines[i] instanceof(Line)) {
                 var line = lines[i];
                 if (line.isPointOnLine(new Point(mouseX, mouseY))) {
-                    return callback(null, line);
+                    callback(null, line);
+                    return;
                 }
             }
         }
-        return callback("can't find line");
+        callback("can't find line");
+        return;
+    }
+
+    function addLine(nodeA, directionA, nodeB, directionB, callback) { // callback(line)
+        var newLine = new Line(nodeA, directionA, nodeB, directionB);
+        nodeA.addLineofDirection(newLine, directionA);
+        nodeB.addLineofDirection(newLine, directionB);
+        lines.push(newLine);
+        console.log('add line : ' + newLine);
     }
 }

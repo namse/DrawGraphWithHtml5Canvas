@@ -45,13 +45,12 @@ function Node(drawable, x, y, width, height) {
     this.linesOfDirection[DrawingLinePointDirection.BOTTOM] = [];
     this.linesOfDirection[DrawingLinePointDirection.LEFT] = [];
     this.linesOfDirection[DrawingLinePointDirection.RIGHT] = [];
-    this.isFocus = false;
     this.highlightedDrawingLinePointDirection = undefined; // or DrawingLinePointDirection
 
 
 
 
-    this.onRender = function (ctx) {
+    this.onRender = function (ctx, isFocus, isClicked) {
         switch (this.drawableType) {
         case DrawableType.CANVAS_DRAWING_FUNCTION:
             ctx.translate(this.x, this.y);
@@ -64,7 +63,7 @@ function Node(drawable, x, y, width, height) {
             ctx.drawImage(this.image, this.x, this.y, this.width, this.height);
             break;
         }
-        if (this.isFocus) {
+        if (isFocus) {
             for (var direction in DrawingLinePointDirection) {
                 var position = this.getDrawingLinePointPosition(DrawingLinePointDirection[direction]);
                 ctx.beginPath();
@@ -77,6 +76,36 @@ function Node(drawable, x, y, width, height) {
                     ctx.stroke();
                 }
             }
+        }
+        if (isClicked) {
+            ctx.beginPath();
+            ctx.strokeStyle = "blue";
+            ctx.lineWidth = 5;
+            var clickedBorder = 10;
+            var minimumWidthBorder = this.width / 5;
+            var minimumHeightBorder = this.height / 5;
+            // 왼쪽 위
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.x + Math.min(clickedBorder, minimumWidthBorder), this.y);
+            ctx.moveTo(this.x, this.y);
+            ctx.lineTo(this.x, this.y + Math.min(clickedBorder, minimumHeightBorder));
+            // 오른쪽 위
+            ctx.moveTo(this.x + this.width, this.y);
+            ctx.lineTo(this.x + this.width - Math.min(clickedBorder, minimumWidthBorder), this.y);
+            ctx.moveTo(this.x + this.width, this.y);
+            ctx.lineTo(this.x + this.width, this.y + Math.min(clickedBorder, minimumHeightBorder));
+            // 왼쪽 아래
+            ctx.moveTo(this.x, this.y + this.height);
+            ctx.lineTo(this.x + Math.min(clickedBorder, minimumWidthBorder), this.y + this.height);
+            ctx.moveTo(this.x, this.y + this.height);
+            ctx.lineTo(this.x, this.y + this.height - Math.min(clickedBorder, minimumHeightBorder));
+            // 오른쪽 아래
+            ctx.moveTo(this.x + this.width, this.y + this.height);
+            ctx.lineTo(this.x + this.width - Math.min(clickedBorder, minimumWidthBorder), this.y + this.height);
+            ctx.moveTo(this.x + this.width, this.y + this.height);
+            ctx.lineTo(this.x + this.width, this.y + this.height - Math.min(clickedBorder, minimumHeightBorder));
+
+            ctx.stroke();
         }
 
     };
@@ -99,13 +128,6 @@ function Node(drawable, x, y, width, height) {
     this.moveBy = function (dx, dy) {
         this.x += dx;
         this.y += dy;
-    };
-
-    this.focusOn = function () {
-        this.isFocus = true;
-    };
-    this.focusOff = function () {
-        this.isFocus = false;
     };
 
     this.isInBound = function (x, y) {
