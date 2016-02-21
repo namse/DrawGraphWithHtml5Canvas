@@ -6,6 +6,7 @@
 
 function Canvas(canvasDOM) {
     this.canvasDOM = canvasDOM;
+    this.onDoubleClicked;
     var nodes = [];
     var lines = [];
     var CanvasState = {
@@ -23,6 +24,9 @@ function Canvas(canvasDOM) {
     var focusedLine;
     var clickedNodes = [];
     var isCtrlKeyPressed = false;
+    var isRender = true;
+    var isDrawGrid = false;
+    var gridWidth = 30;
 
     function onKeyDown(e) {
         // 17 == ctrl
@@ -59,6 +63,11 @@ function Canvas(canvasDOM) {
         else if (e.keyCode == 46) {
             removeClickedNodes();
         }
+
+        // 71 == g
+        else if (e.keyCode == 71) {
+            isDrawGrid = !isDrawGrid;
+        }
     }
     // register the handler 
     document.addEventListener('keydown', onKeyDown, false);
@@ -82,37 +91,43 @@ function Canvas(canvasDOM) {
     };
 
     this.onRender = function () {
-        var ctx = canvasDOM.getContext('2d');
-        if (!!!ctx) {
-            console.log("can't get context of Canvas DOM.");
-        }
-        else {
-            ctx.setTransform(1, 0, 0, 1, 0, 0);
-            ctx.clearRect(0, 0, canvasDOM.width, canvasDOM.height);
+        if (isRender) {
+            var ctx = canvasDOM.getContext('2d');
+            if (!!!ctx) {
+                console.log("can't get context of Canvas DOM.");
+            }
+            else {
+                ctx.setTransform(1, 0, 0, 1, 0, 0);
+                ctx.clearRect(0, 0, canvasDOM.width, canvasDOM.height);
 
-            for (var i in lines) {
-                var line = lines[i];
-                if (line == focusedLine) {
-                    line.onRender(ctx, 'red');
+                if (isDrawGrid) {
+                    drawGrid(ctx);
                 }
-                else {
-                    line.onRender(ctx);
+
+                for (var i in lines) {
+                    var line = lines[i];
+                    if (line == focusedLine) {
+                        line.onRender(ctx, 'red');
+                    }
+                    else {
+                        line.onRender(ctx);
+                    }
                 }
-            }
-            if (temporaryLine) {
-                temporaryLine.onRender(ctx);
-            }
-            for (var i in nodes) {
-                var node = nodes[i];
-                var isFocus = false;
-                var isClicked = false;
-                if (node == focusedNode) {
-                    isFocus = true;
+                if (temporaryLine) {
+                    temporaryLine.onRender(ctx);
                 }
-                if (clickedNodes.indexOf(node) != -1) {
-                    isClicked = true;
+                for (var i in nodes) {
+                    var node = nodes[i];
+                    var isFocus = false;
+                    var isClicked = false;
+                    if (node == focusedNode) {
+                        isFocus = true;
+                    }
+                    if (clickedNodes.indexOf(node) != -1) {
+                        isClicked = true;
+                    }
+                    node.onRender(ctx, isFocus, isClicked);
                 }
-                node.onRender(ctx, isFocus, isClicked);
             }
         }
     };
@@ -318,12 +333,36 @@ function Canvas(canvasDOM) {
     }
 
     function removeClickedNodes() {
-        for(var i in clickedNodes){
+        for (var i in clickedNodes) {
             var clickedNode = clickedNodes[i];
             var index = nodes.indexOf(clickedNode);
             if (index > -1) {
                 nodes.splice(index, 1);
             }
         }
+    }
+
+    this.stopRender = function () {
+        isRender = false;
+    };
+
+    this.startRender = function () {
+        isRender = true;
+    };
+
+    function drawGrid(ctx) {
+        ctx.beginPath();
+        ctx.strokeStyle = "gray";
+        ctx.lineWidth = 1;
+        for (var x = 0; x <= canvasDOM.width; x += gridWidth) {
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, canvasDOM.height);
+        }
+
+        for (var y = 0; y <= canvasDOM.height; y += gridWidth) {
+            ctx.moveTo(0, y);
+            ctx.lineTo(canvasDOM.width, y);
+        }
+        ctx.stroke();
     }
 }
