@@ -13,7 +13,8 @@ function Canvas(canvasDOM) {
         IDLE: 'IDLE',
         NODE_CLICKED: 'NODE_CLICKED',
         DRAWING_LINE_POINT_CLICKED: 'DRAWING_LINE_POINT_CLICKED',
-        LINE_CLICKED: 'LINE_CLICKED'
+        LINE_CLICKED: 'LINE_CLICKED',
+        TITLE_CLICKED: 'TITLE_CLICKED'
     };
     var canvasStateMachine = CanvasState.IDLE;
     var mouseX;
@@ -23,6 +24,7 @@ function Canvas(canvasDOM) {
     var temporaryLine;
     var focusedLine;
     var clickedNodes = [];
+    var clickedTitleLine;
     var isCtrlKeyPressed = false;
     var isRender = true;
     var isDrawGrid = false;
@@ -39,7 +41,7 @@ function Canvas(canvasDOM) {
         // 78 == n
         if (e.keyCode == 78 && canvasStateMachine == CanvasState.LINE_CLICKED) {
             var title = prompt("input line's text", '');
-            focusedLine.title = title || '';
+            focusedLine.setTitle(title);
         }
 
         // 68 == d
@@ -171,8 +173,17 @@ function Canvas(canvasDOM) {
                             canvasStateMachine = CanvasState.LINE_CLICKED;
                         }
                         else {
-                            canvasStateMachine = CanvasState.IDLE;
-                            clickedNodes = [];
+                            findLineOfTitle(function (err, line) {
+                                if (!!!err) {
+                                    clickedTitleLine = line;
+                                    canvasStateMachine = CanvasState.TITLE_CLICKED;
+                                }
+                                else {
+                                    canvasStateMachine = CanvasState.IDLE;
+                                    clickedNodes = [];
+                                }
+                            });
+
                         }
                     });
                 }
@@ -212,9 +223,13 @@ function Canvas(canvasDOM) {
                 }
             });
             break;
+        case CanvasState.TITLE_CLICKED:
+            canvasStateMachine = CanvasState.IDLE;
+            break;
         }
     }).mousemove(function (e) {
         console.log('move');
+        console.log(canvasStateMachine);
         var prevX = mouseX;
         var prevY = mouseY;
 
@@ -256,6 +271,10 @@ function Canvas(canvasDOM) {
                     canvasStateMachine = CanvasState.IDLE;
                 }
             });
+            break;
+        case CanvasState.TITLE_CLICKED:
+            clickedTitleLine.titlePosition.x += dX;
+            clickedTitleLine.titlePosition.y += dY;
             break;
         }
     }).mouseenter(function (e) {
@@ -315,6 +334,20 @@ function Canvas(canvasDOM) {
             if (lines[i] instanceof(Line)) {
                 var line = lines[i];
                 if (line.isPointOnLine(new Point(mouseX, mouseY))) {
+                    callback(null, line);
+                    return;
+                }
+            }
+        }
+        callback("can't find line");
+        return;
+    }
+
+    function findLineOfTitle(callback) { // callback(err, line)
+        for (var i in lines) {
+            if (lines[i] instanceof(Line)) {
+                var line = lines[i];
+                if (line.isTitleClicked(new Point(mouseX, mouseY))) {
                     callback(null, line);
                     return;
                 }

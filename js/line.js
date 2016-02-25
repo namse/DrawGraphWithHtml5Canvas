@@ -23,7 +23,26 @@ function Line(nodeA, directionA, nodeB, directionB) {
     this.nodeB = nodeB;
     this.directionB = directionB;
     this.points = []; // below -> above
-    this.title = '';
+    var title = '';
+    var isTitleChanged = false;
+    var titleWidth = 0;
+    this.titlePosition = {
+        x: undefined,
+        y: undefined
+    };
+    var prevNodeAPosition = {
+        x: undefined,
+        y: undefined
+    };
+    var prevNodeBPosition = {
+        x: undefined,
+        y: undefined
+    };
+    this.titleFillStyle = "black";
+    this.titleFontSize = 15;
+    this.titleFontFamily = 'Arial';
+
+
 
     var lineWidth = 2;
 
@@ -388,7 +407,15 @@ function Line(nodeA, directionA, nodeB, directionB) {
     this.calculateDrawingPoints();
 
     this.onRender = function (ctx, strokeStyle) {
-        this.calculateDrawingPoints();
+
+        var isNodePositionChanged = false;
+        if (prevNodeAPosition.x != nodeA.x ||
+            prevNodeAPosition.y != nodeA.y ||
+            prevNodeBPosition.x != nodeB.x ||
+            prevNodeBPosition.y != nodeB.y) {
+            isNodePositionChanged = true;
+            this.calculateDrawingPoints();
+        }
         ctx.beginPath();
         ctx.lineWidth = lineWidth;
         ctx.strokeStyle = strokeStyle || "black";
@@ -414,19 +441,6 @@ function Line(nodeA, directionA, nodeB, directionB) {
                 ctx.lineTo(point.x, point.y);
             }
             ctx.lineTo(aboveNodeStartPosition.x, aboveNodeStartPosition.y);
-
-            // 화살표 그리기
-            var pointLength = this.points.length;
-            if (pointLength > 0) {
-                var lastPointIndex;
-                if (aboveNode == nodeB) {
-                    lastPointIndex = this.points.length - 1;
-                }
-                else {
-                    lastPointIndex = 0;
-                }
-                var lastPoint = this.points[lastPointIndex];
-            }
         }
 
         // draw arrow
@@ -434,37 +448,44 @@ function Line(nodeA, directionA, nodeB, directionB) {
         var nodeBStartPosition = nodeB.getLineStartPosition(directionB);
         drawArrow(ctx, directionB, nodeBStartPosition.x, nodeBStartPosition.y);
 
-        // title text
-        if (this.points.length > 0) {
-            var centerPointIndex = parseInt((this.points.length - 1) / 2);
-            var centerPoint = this.points[centerPointIndex];
-            var textAlign;
-
-            if (this.points.length == 1) {
-                textAlign = 'left';
-            }
-            else {
-                var nextPoint = this.points[centerPointIndex + 1];
-                if (nextPoint.y == centerPoint.y) {
-                    textAlign = 'center';
-                }
-                else if (nextPoint.x == centerPoint.x) {
-                    textAlign = 'left';
-                }
-                else {
-                    textAlign = 'center';
-                }
-                centerPoint.x += (nextPoint.x - centerPoint.x) / 2;
-                centerPoint.y += (nextPoint.y - centerPoint.y) / 2;
-            }
-
-            ctx.fillStyle = "black";
-            ctx.font = '15px Arial';
-            ctx.textAlign = textAlign;
-            ctx.fillText(this.title, centerPoint.x + 2, centerPoint.y - 2);
+        // title
+        if (isTitleChanged) {
+            this.titleWidth = ctx.measureText(title).width;
+            isTitleChanged = false;
         }
 
+        if (isNodePositionChanged == true) {
+            // reset title position
+            if (this.points.length > 0) {
+                var centerPointIndex = parseInt((this.points.length - 1) / 2);
+                this.titlePosition = Object.create(this.points[centerPointIndex]);
+
+                if (this.points.length > 1) {
+                    var nextPoint = this.points[centerPointIndex + 1];
+                    this.titlePosition.x += (nextPoint.x - this.titlePosition.x) / 2;
+                    this.titlePosition.y += (nextPoint.y - this.titlePosition.y) / 2;
+                    if (nextPoint.x != this.titlePosition.x) {
+                        this.titlePosition.x -= this.titleWidth / 2;
+                    }
+                }
+
+            }
+        }
+        if (title && title.length > 0) {
+            ctx.fillStyle = this.titleFillStyle;
+            ctx.font = this.titleFontSize + 'px ' + this.titleFontFamily;
+            ctx.textAlign = 'left';
+            ctx.fillText(title, this.titlePosition.x + 2, this.titlePosition.y - 2);
+        }
+        
         ctx.stroke();
+
+        if (isNodePositionChanged) {
+            prevNodeAPosition.x = nodeA.x;
+            prevNodeAPosition.y = nodeA.y;
+            prevNodeBPosition.x = nodeB.x;
+            prevNodeBPosition.y = nodeB.y;
+        }
     };
 
     //http://stackoverflow.com/questions/808826/draw-arrow-on-canvas-tag#answer-6333775
@@ -541,5 +562,27 @@ function Line(nodeA, directionA, nodeB, directionB) {
         }
 
         return false;
+    };
+
+    this.isTitleClicked = function (mousePoint) {
+        if (title == '' || this.titlePosition.x == undefined || this.titlePosition.y == undefined) {
+            return false;
+        }
+        else {
+            if (this.titlePosition.x <= mousePoint.x && mousePoint.x <= this.titlePosition.x + this.titleWidth && this.titlePosition.y - this.titleFontSize <= mousePoint.y && mousePoint.y <= this.titlePosition.y) {
+                return true;
+            }
+        }
+    };
+
+    this.setTitle = function (_title) {
+        if (_title) {
+            title = _title;
+            isTitleChanged = true;
+        }
+    };
+
+    this.getTitle = function () {
+        return title;
     };
 }
