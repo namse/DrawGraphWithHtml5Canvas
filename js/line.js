@@ -426,10 +426,13 @@ function Line(nodeA, directionA, nodeB, directionB) {
                     lastPointIndex = 0;
                 }
                 var lastPoint = this.points[lastPointIndex];
-                var nodeBStartPosition = nodeB.getLineStartPosition(directionB);
-                drawArrow(ctx, lastPoint.x, lastPoint.y, nodeBStartPosition.x, nodeBStartPosition.y);
             }
         }
+
+        // draw arrow
+
+        var nodeBStartPosition = nodeB.getLineStartPosition(directionB);
+        drawArrow(ctx, directionB, nodeBStartPosition.x, nodeBStartPosition.y);
 
         // title text
         if (this.points.length > 0) {
@@ -465,15 +468,27 @@ function Line(nodeA, directionA, nodeB, directionB) {
     };
 
     //http://stackoverflow.com/questions/808826/draw-arrow-on-canvas-tag#answer-6333775
-    function drawArrow(context, fromx, fromy, tox, toy) {
+    function drawArrow(context, direction, tox, toy) {
         var headlen = 10; // length of head in pixels
-        var angle = Math.atan2(toy - fromy, tox - fromx);
-        context.moveTo(fromx, fromy);
-        context.lineTo(tox, toy);
+        var angle;
+        switch (direction) {
+        case DrawingLinePointDirection.TOP:
+            angle = Math.PI / 2;
+            break;
+        case DrawingLinePointDirection.RIGHT:
+            angle = 0;
+            break;
+        case DrawingLinePointDirection.BOTTOM:
+            angle = -Math.PI / 2;
+            break;
+        case DrawingLinePointDirection.LEFT:
+            angle = Math.PI;
+            break;
+        }
+        context.moveTo(tox, toy);
         context.lineTo(tox - headlen * Math.cos(angle - Math.PI / 6), toy - headlen * Math.sin(angle - Math.PI / 6));
         context.moveTo(tox, toy);
         context.lineTo(tox - headlen * Math.cos(angle + Math.PI / 6), toy - headlen * Math.sin(angle + Math.PI / 6));
-        context.lineTo(tox, toy);
     }
 
 
