@@ -288,7 +288,8 @@ function Canvas(canvasDOM) {
         temporaryLine = undefined;
     });
 
-    function updateMousePosition(e) {var canvasBoundingRect = canvasDOM.getBoundingClientRect();
+    function updateMousePosition(e) {
+        var canvasBoundingRect = canvasDOM.getBoundingClientRect();
         mouseX = e.pageX - canvasBoundingRect.left;
         mouseY = e.pageY - canvasBoundingRect.top;
     }
@@ -368,9 +369,22 @@ function Canvas(canvasDOM) {
     function removeClickedNodes() {
         for (var i in clickedNodes) {
             var clickedNode = clickedNodes[i];
+            removeLineOfNode(clickedNode);
             var index = nodes.indexOf(clickedNode);
             if (index > -1) {
                 nodes.splice(index, 1);
+            }
+        }
+    }
+
+    function removeLineOfNode(node) {
+        for (var direction in DrawingLinePointDirection) {
+            for (var i in node.linesOfDirection[direction]) {
+                var line = node.linesOfDirection[direction][i];
+                var index = lines.indexOf(line);
+                if (index > -1) {
+                    lines.splice(index, 1);
+                }
             }
         }
     }
