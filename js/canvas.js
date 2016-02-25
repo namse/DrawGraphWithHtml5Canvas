@@ -288,9 +288,9 @@ function Canvas(canvasDOM) {
         temporaryLine = undefined;
     });
 
-    function updateMousePosition(e) {
-        mouseX = e.pageX - canvasDOM.offsetLeft;
-        mouseY = e.pageY - canvasDOM.offsetTop;
+    function updateMousePosition(e) {var canvasBoundingRect = canvasDOM.getBoundingClientRect();
+        mouseX = e.pageX - canvasBoundingRect.left;
+        mouseY = e.pageY - canvasBoundingRect.top;
     }
 
     function findNodeAndFocus(callback) { // callback(err, node)
