@@ -497,13 +497,13 @@ function Line(nodeA, directionA, nodeB, directionB) {
             angle = Math.PI / 2;
             break;
         case DrawingLinePointDirection.RIGHT:
-            angle = 0;
+            angle = Math.PI;
             break;
         case DrawingLinePointDirection.BOTTOM:
             angle = -Math.PI / 2;
             break;
         case DrawingLinePointDirection.LEFT:
-            angle = Math.PI;
+            angle = 0;
             break;
         }
         context.moveTo(tox, toy);
