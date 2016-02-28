@@ -29,6 +29,8 @@ function Canvas(canvasDOM) {
     var isRender = true;
     var isDrawGrid = false;
     var gridWidth = 30;
+    var isMouseDown = false;
+    var editingPointPair = -1;
 
     function onKeyDown(e) {
         // 17 == ctrl
@@ -109,7 +111,8 @@ function Canvas(canvasDOM) {
                 for (var i in lines) {
                     var line = lines[i];
                     if (line == focusedLine) {
-                        line.onRender(ctx, 'red');
+                        var isEditMode = true;
+                        line.onRender(ctx, 'red', isEditMode);
                     }
                     else {
                         line.onRender(ctx);
@@ -144,7 +147,7 @@ function Canvas(canvasDOM) {
     };
 
     $(canvasDOM).mousedown(function (e) {
-        console.log('down');
+        isMouseDown = true;
         updateMousePosition(e);
         switch (canvasStateMachine) {
         case CanvasState.LINE_CLICKED:
@@ -171,6 +174,7 @@ function Canvas(canvasDOM) {
                         if (!!!err) {
                             focusedLine = line;
                             canvasStateMachine = CanvasState.LINE_CLICKED;
+                            editingPointPair = line.findEditablePointsPair(mouseX, mouseY);
                         }
                         else {
                             findLineOfTitle(function (err, line) {
@@ -191,7 +195,7 @@ function Canvas(canvasDOM) {
             break;
         }
     }).mouseup(function (e) {
-        console.log('up');
+        isMouseDown = false;
         updateMousePosition(e);
 
         switch (canvasStateMachine) {
@@ -226,10 +230,11 @@ function Canvas(canvasDOM) {
         case CanvasState.TITLE_CLICKED:
             canvasStateMachine = CanvasState.IDLE;
             break;
+        case CanvasState.LINE_CLICKED:
+            editingPointPair = -1;
+            break;
         }
     }).mousemove(function (e) {
-        console.log('move');
-        console.log(canvasStateMachine);
         var prevX = mouseX;
         var prevY = mouseY;
 
@@ -240,7 +245,18 @@ function Canvas(canvasDOM) {
 
         switch (canvasStateMachine) {
         case CanvasState.IDLE:
-            findNodeAndFocus();
+            findNodeAndFocus(function (err, node) {
+                if (!!err || !!!node) {
+                    findLine(function (err, line) {
+                        if (!!!err) {
+                            focusedLine = line;
+                        }
+                        else {
+                            focusedLine = null;
+                        }
+                    });
+                }
+            });
             break;
         case CanvasState.NODE_CLICKED:
             focusedNode.moveBy(dX, dY);
@@ -262,6 +278,9 @@ function Canvas(canvasDOM) {
             });
             break;
         case CanvasState.LINE_CLICKED:
+            if (isMouseDown) {
+                focusedLine.handleEditPointsPair(editingPointPair, dX, dY);
+            }
             findLine(function (err, line) {
                 if (!!!err) {
                     focusedLine = line;

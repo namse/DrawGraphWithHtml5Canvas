@@ -41,7 +41,7 @@ function Line(nodeA, directionA, nodeB, directionB) {
     this.titleFillStyle = "black";
     this.titleFontSize = 15;
     this.titleFontFamily = 'Arial';
-
+    var editDiamondLength = 8;
 
 
     var lineWidth = 2;
@@ -488,38 +488,32 @@ function Line(nodeA, directionA, nodeB, directionB) {
             prevNodeBPosition.y = nodeB.y;
         }
 
-        if (onEditMode || true) {
+        if (onEditMode) {
             // without first and last points pair
             for (var i = 0; i < this.points.length - 1; i++) {
                 var frontPoint = this.points[i];
                 var rearPoint = this.points[i + 1];
                 var centerOfPoints = new Point((frontPoint.x + rearPoint.x) / 2, (frontPoint.y + rearPoint.y) / 2);
 
-
-
                 ctx.save();
                 ctx.beginPath();
                 ctx.lineWidth = 1;
                 ctx.strokeStyle = "black";
                 ctx.fillStyle = 'yellow';
-                
-                var rectLength = 8;
-                
+
                 /*
                  * draw diamond
                  */
-                
-                
+
                 //Translate to the center of the canvas
                 ctx.translate(centerOfPoints.x, centerOfPoints.y);
                 ctx.rotate(Math.PI / 4);
-                ctx.translate(-(rectLength / 2), -(rectLength / 2));
-                
-                ctx.fillRect(0, 0, rectLength, rectLength);
-                ctx.strokeRect(0, 0, rectLength, rectLength);
-                
-                ctx.restore();
+                ctx.translate(-(editDiamondLength / 2), -(editDiamondLength / 2));
 
+                ctx.fillRect(0, 0, editDiamondLength, editDiamondLength);
+                ctx.strokeRect(0, 0, editDiamondLength, editDiamondLength);
+
+                ctx.restore();
             }
         }
     };
@@ -550,7 +544,6 @@ function Line(nodeA, directionA, nodeB, directionB) {
 
 
     this.isPointOnLine = function (point) {
-        this.calculateDrawingPoints();
         if (isCurve) {
             return false;
         }
@@ -620,5 +613,35 @@ function Line(nodeA, directionA, nodeB, directionB) {
 
     this.getTitle = function () {
         return title;
+    };
+
+    this.findEditablePointsPair = function (mouseX, mouseY) {
+        for (var i = 0; i < this.points.length - 1; i++) {
+            var frontPoint = this.points[i];
+            var rearPoint = this.points[i + 1];
+            var centerOfPoints = new Point((frontPoint.x + rearPoint.x) / 2, (frontPoint.y + rearPoint.y) / 2);
+
+            // is mouse point insdie of diamond?
+            // just AA,BB Test
+            if (centerOfPoints.x - editDiamondLength / 2 <= mouseX && mouseX <= centerOfPoints.x + editDiamondLength / 2 && centerOfPoints.y - editDiamondLength / 2 <= mouseY && mouseY <= centerOfPoints.y + editDiamondLength / 2) {
+                return i;
+            }
+        }
+        return -1;
+    };
+
+    this.handleEditPointsPair = function (index, dx, dy) {
+        if(index < 0) return;
+        var frontPoint = this.points[index];
+        var rearPoint = this.points[index + 1];
+
+        if (frontPoint.x == rearPoint.x) {
+            frontPoint.x += dx;
+            rearPoint.x += dx;
+        }
+        else {
+            frontPoint.y += dy;
+            rearPoint.y += dy;
+        }
     };
 }
