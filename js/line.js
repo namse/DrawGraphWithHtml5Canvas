@@ -406,7 +406,7 @@ function Line(nodeA, directionA, nodeB, directionB) {
     };
     this.calculateDrawingPoints();
 
-    this.onRender = function (ctx, strokeStyle) {
+    this.onRender = function (ctx, strokeStyle, onEditMode) {
 
         var isNodePositionChanged = false;
         if (prevNodeAPosition.x != nodeA.x ||
@@ -416,6 +416,7 @@ function Line(nodeA, directionA, nodeB, directionB) {
             isNodePositionChanged = true;
             this.calculateDrawingPoints();
         }
+
         ctx.beginPath();
         ctx.lineWidth = lineWidth;
         ctx.strokeStyle = strokeStyle || "black";
@@ -477,7 +478,7 @@ function Line(nodeA, directionA, nodeB, directionB) {
             ctx.textAlign = 'left';
             ctx.fillText(title, this.titlePosition.x + 2, this.titlePosition.y - 2);
         }
-        
+
         ctx.stroke();
 
         if (isNodePositionChanged) {
@@ -485,6 +486,41 @@ function Line(nodeA, directionA, nodeB, directionB) {
             prevNodeAPosition.y = nodeA.y;
             prevNodeBPosition.x = nodeB.x;
             prevNodeBPosition.y = nodeB.y;
+        }
+
+        if (onEditMode || true) {
+            // without first and last points pair
+            for (var i = 0; i < this.points.length - 1; i++) {
+                var frontPoint = this.points[i];
+                var rearPoint = this.points[i + 1];
+                var centerOfPoints = new Point((frontPoint.x + rearPoint.x) / 2, (frontPoint.y + rearPoint.y) / 2);
+
+
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.lineWidth = 1;
+                ctx.strokeStyle = "black";
+                ctx.fillStyle = 'yellow';
+                
+                var rectLength = 8;
+                
+                /*
+                 * draw diamond
+                 */
+                
+                
+                //Translate to the center of the canvas
+                ctx.translate(centerOfPoints.x, centerOfPoints.y);
+                ctx.rotate(Math.PI / 4);
+                ctx.translate(-(rectLength / 2), -(rectLength / 2));
+                
+                ctx.fillRect(0, 0, rectLength, rectLength);
+                ctx.strokeRect(0, 0, rectLength, rectLength);
+                
+                ctx.restore();
+
+            }
         }
     };
 
