@@ -440,6 +440,7 @@ function Line(nodeA, directionA, nodeB, directionB, toMouse, mouseX, mouseY) {
         ctx.beginPath();
         ctx.lineWidth = lineWidth;
         ctx.strokeStyle = strokeStyle || "black";
+        ctx.lineJoin = 'round';
         var belowNodeStartPosition = belowNode.getLineStartPosition(belowDirection);
         var aboveNodeStartPosition = aboveNode.getLineStartPosition(aboveDirection);
 
@@ -457,9 +458,36 @@ function Line(nodeA, directionA, nodeB, directionB, toMouse, mouseX, mouseY) {
         }
         else {
             ctx.moveTo(belowNodeStartPosition.x, belowNodeStartPosition.y);
+            var prevPoint = belowNodeStartPosition;
+            var radius = 5;
             for (var i in this.points) {
+                i = parseInt(i);
                 var point = this.points[i];
-                ctx.lineTo(point.x, point.y);
+                var nextPoint = this.points.length <= i + 1 ? aboveNodeStartPosition : this.points[i + 1];
+                if (nextPoint.x == point.x) {
+                    var dx = point.x - prevPoint.x;
+                    if (Math.abs(dx) > radius) {
+                        dx = dx > 0 ? radius : -radius;
+                    }
+                    var dy = nextPoint.y - point.y;
+                    if (Math.abs(dy) > radius) {
+                        dy = dy > 0 ? radius : -radius;
+                    }
+                    ctx.lineTo(point.x - dx, point.y);
+                    ctx.quadraticCurveTo(point.x, point.y, point.x, point.y + dy);
+                }
+                else {
+                    var dy = point.y - prevPoint.y;
+                    if (Math.abs(dy) > radius) {
+                        dy = dy > 0 ? radius : -radius;
+                    }
+                    var dx = nextPoint.x - point.x;
+                    if (Math.abs(dx) > radius) {
+                        dx = dx > 0 ? radius : -radius;
+                    }
+                    ctx.lineTo(point.x, point.y - dy);
+                    ctx.quadraticCurveTo(point.x, point.y, point.x + dx, point.y);
+                }
             }
             ctx.lineTo(aboveNodeStartPosition.x, aboveNodeStartPosition.y);
         }
