@@ -614,9 +614,13 @@ function Canvas(canvasDOM) {
 
     function findNodesOnDragArea() {
         clickedNodes = [];
+        var minX = Math.min(mouseDragStartPoint.x, mouseX);
+        var minY = Math.min(mouseDragStartPoint.y, mouseY);
+        var maxX = Math.max(mouseDragStartPoint.x, mouseX);
+        var maxY = Math.max(mouseDragStartPoint.y, mouseY);
         for (var i in nodes) {
             var node = nodes[i];
-            if (mouseDragStartPoint.x <= node.x && node.x + node.width <= mouseX && mouseDragStartPoint.y <= node.y && node.y + node.height <= mouseY) {
+            if (minX <= node.x && node.x + node.width <= maxX && minY <= node.y && node.y + node.height <= maxY) {
                 clickedNodes.push(node);
             }
         }
