@@ -469,35 +469,50 @@ function Line(nodeA, directionA, nodeB, directionB, toMouse, mouseX, mouseY) {
         var nodeBStartPosition = this.nodeB.getLineStartPosition(this.directionB);
         drawArrow(ctx, this.directionB, nodeBStartPosition.x, nodeBStartPosition.y);
 
-        // title
-        if (isTitleChanged) {
-            this.titleWidth = ctx.measureText(title).width;
-            isTitleChanged = false;
-        }
+        if (!!!toMouse) {
 
-        if (isNodePositionChanged == true) {
-            // reset title position
-            if (this.points.length > 0) {
-                var centerPointIndex = parseInt((this.points.length - 1) / 2);
-                this.titlePosition = Object.create(this.points[centerPointIndex]);
-
-                if (this.points.length > 1) {
-                    var nextPoint = this.points[centerPointIndex + 1];
-                    this.titlePosition.x += (nextPoint.x - this.titlePosition.x) / 2;
-                    this.titlePosition.y += (nextPoint.y - this.titlePosition.y) / 2;
-                    if (nextPoint.x != this.titlePosition.x) {
-                        this.titlePosition.x -= this.titleWidth / 2;
-                    }
-                }
-
-            }
-        }
-        if (title && title.length > 0) {
+            // title
             ctx.fillStyle = this.titleFillStyle;
             ctx.font = this.titleFontSize + 'px ' + this.titleFontFamily;
             ctx.textAlign = 'left';
-            ctx.fillText(title, this.titlePosition.x + 2, this.titlePosition.y - 2);
+
+            if (isTitleChanged) {
+                this.titleWidth = ctx.measureText(title).width;
+            }
+            if (isNodePositionChanged == true || isTitleChanged) {
+                // reset title position
+                if (this.points.length > 0) {
+                    var titleGap = 4;
+                    var startPoint = this.nodeA.getLineStartPosition(this.directionA);
+                    switch (this.directionA) {
+                    case DrawingLinePointDirection.TOP:
+                        this.titlePosition.x = startPoint.x;
+                        this.titlePosition.y = startPoint.y;
+                        break;
+                    case DrawingLinePointDirection.RIGHT:
+                        this.titlePosition.x = startPoint.x;
+                        this.titlePosition.y = startPoint.y;
+                        break;
+                    case DrawingLinePointDirection.BOTTOM:
+                        this.titlePosition.x = startPoint.x;
+                        this.titlePosition.y = startPoint.y + this.titleFontSize;
+                        break;
+                    case DrawingLinePointDirection.LEFT:
+                        this.titlePosition.x = startPoint.x - this.titleWidth - titleGap;
+                        this.titlePosition.y = startPoint.y;
+                        break;
+                    }
+                }
+            }
+            if (title && title.length > 0) {
+                ctx.fillStyle = this.titleFillStyle;
+                ctx.font = this.titleFontSize + 'px ' + this.titleFontFamily;
+                ctx.textAlign = 'left';
+                ctx.fillText(title, this.titlePosition.x + 2, this.titlePosition.y - 2);
+            }
+            isTitleChanged = false;
         }
+
 
         ctx.stroke();
 
