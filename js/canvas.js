@@ -66,6 +66,7 @@ function Canvas(canvasDOM) {
         // 46 == delete
         else if (e.keyCode == 46) {
             removeClickedNodes();
+            removeLine(focusedLine);
         }
 
         // 71 == g
@@ -174,6 +175,7 @@ function Canvas(canvasDOM) {
                         if (!!!err) {
                             focusedLine = line;
                             canvasStateMachine = CanvasState.LINE_CLICKED;
+                            clickedNodes = [];
                             editingPointPair = line.findEditablePointsPair(mouseX, mouseY);
                         }
                         else {
@@ -274,7 +276,8 @@ function Canvas(canvasDOM) {
                         temporaryLine = new Line(focusedNode, clickedNodeDrawingLinePointDirection, node, direction);
                         // don't push temporaryLine to lines
                     }
-                } else {
+                }
+                else {
                     var toMouse = true;
                     temporaryLine = new Line(focusedNode, clickedNodeDrawingLinePointDirection, null, null, toMouse, mouseX, mouseY);
                 }
@@ -403,11 +406,25 @@ function Canvas(canvasDOM) {
         for (var direction in DrawingLinePointDirection) {
             for (var i in node.linesOfDirection[direction]) {
                 var line = node.linesOfDirection[direction][i];
-                var index = lines.indexOf(line);
-                if (index > -1) {
-                    lines.splice(index, 1);
-                }
+                removeLine(line);
             }
+        }
+    }
+
+    function removeLine(line) {
+        var index = lines.indexOf(line);
+        if (index > -1) {
+            lines.splice(index, 1);
+        }
+        
+        index = line.nodeA.linesOfDirection[line.directionA].indexOf(line);
+        if (index > -1) {
+            line.nodeA.linesOfDirection[line.directionA].splice(index, 1);
+        }
+        
+        index = line.nodeB.linesOfDirection[line.directionB].indexOf(line);
+        if (index > -1) {
+            line.nodeB.linesOfDirection[line.directionB].splice(index, 1);
         }
     }
 
