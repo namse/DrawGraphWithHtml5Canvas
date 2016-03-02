@@ -64,6 +64,64 @@ function Canvas(canvasDOM) {
         else if (e.keyCode == 86 && isCtrlKeyPressed == true) {
             pasteClickedNodes();
         }
+
+        if (37 <= e.keyCode && e.keyCode <= 40) { // Arrow Keys
+
+            if (clickedNodes.length == 1 && e.shiftKey) {
+                var x = clickedNodes[0].x;
+                var y = clickedNodes[0].y;
+                
+                switch (e.keyCode) {
+                case 37: // left key
+                    x -= 1;
+                    x = Math.floor(x / gridWidth) * gridWidth;
+                    break;
+                case 38: // up key
+                    y -= 1;
+                    y = Math.floor(y / gridWidth) * gridWidth;
+                    break;
+                case 39: // right key
+                    x += 1;
+                    x = Math.ceil(x / gridWidth) * gridWidth;
+                    break;
+                case 40: // down key
+                    y += 1;
+                    y = Math.ceil(y / gridWidth) * gridWidth;
+                    break;
+                }
+                clickedNodes[0].x = x;
+                clickedNodes[0].y = y;
+            }
+            else if (clickedNodes.length > 0) {
+                var dx = 0;
+                var dy = 0;
+                switch (e.keyCode) {
+                case 37: // left key
+                    dx = -1;
+                    break;
+                case 38: // up key
+                    dy = -1;
+                    break;
+                case 39: // right key
+                    dx = 1;
+                    break;
+                case 40: // down key
+                    dy = 1;
+                    break;
+                }
+                
+                if (e.shiftKey) {
+                    dx *= gridWidth;
+                    dy *= gridWidth;
+                }
+                
+                for(var i in clickedNodes){
+                    var node = clickedNodes[i];
+                    node.x += dx;
+                    node.y += dy;
+                }
+            }
+        }
     }
 
     function onKeyUp(e) {
@@ -135,9 +193,9 @@ function Canvas(canvasDOM) {
             else {
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
                 ctx.clearRect(0, 0, canvasDOM.width, canvasDOM.height);
-                
+
                 // drag rect
-                if(canvasStateMachine == CanvasState.DRAG){
+                if (canvasStateMachine == CanvasState.DRAG) {
                     ctx.save();
                     ctx.strokeStyle = 'black';
                     ctx.fillStyle = 'gray';
@@ -146,7 +204,7 @@ function Canvas(canvasDOM) {
                     ctx.fill();
                     ctx.restore();
                 }
-                
+
                 if (isDrawGrid) {
                     drawGrid(ctx);
                 }
@@ -178,8 +236,8 @@ function Canvas(canvasDOM) {
                     }
                     node.onRender(ctx, isFocus, isClicked);
                 }
-                
-                
+
+
             }
         }
     };
