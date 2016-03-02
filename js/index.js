@@ -190,12 +190,12 @@ function drop(ev) {
     var canvasTop = boundingClientRect.top;
     var canvasLeft = boundingClientRect.left;
 
-    var positionX = parseInt(event.clientX - canvasLeft - drawableObject.width/2);
-    var positionY = parseInt(event.clientY - canvasTop - drawableObject.height/2);
+    var positionX = parseInt(event.clientX - canvasLeft - drawableObject.width / 2);
+    var positionY = parseInt(event.clientY - canvasTop - drawableObject.height / 2);
 
     canvas.addNode(drawableObject.drawFunction, positionX, positionY, drawableObject.width, drawableObject.height);
 }
 
-function ondbclick(){
-    console.log(canvas);
+function ondbclick() {
+    console.log(canvas.getLastClickedNode());
 }

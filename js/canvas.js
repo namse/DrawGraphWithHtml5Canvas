@@ -6,7 +6,6 @@
 
 function Canvas(canvasDOM) {
     this.canvasDOM = canvasDOM;
-    this.onDoubleClicked;
     var nodes = [];
     var lines = [];
     var CanvasState = {
@@ -31,6 +30,8 @@ function Canvas(canvasDOM) {
     var gridWidth = 30;
     var isMouseDown = false;
     var editingPointPair = -1;
+    this.lastClickedNode = '123';
+    var self = this;
 
     function onKeyDown(e) {
         // 17 == ctrl
@@ -66,7 +67,9 @@ function Canvas(canvasDOM) {
         // 46 == delete
         else if (e.keyCode == 46) {
             removeClickedNodes();
-            removeLine(focusedLine);
+            if (focusedLine) {
+                removeLine(focusedLine);
+            }
         }
 
         // 71 == g
@@ -147,6 +150,8 @@ function Canvas(canvasDOM) {
         };
     };
 
+
+    // use self instead this
     $(canvasDOM).mousedown(function (e) {
         isMouseDown = true;
         updateMousePosition(e);
@@ -160,6 +165,7 @@ function Canvas(canvasDOM) {
                             clickedNodes = [];
                         }
                         clickedNodes.push(node);
+                        self.lastClickedNode = node;
                     }
                     clickedNodeDrawingLinePointDirection = node.isInDrawingLinePointBound(mouseX, mouseY); // false of Direction
                     console.log(clickedNodeDrawingLinePointDirection);
@@ -400,6 +406,7 @@ function Canvas(canvasDOM) {
                 nodes.splice(index, 1);
             }
         }
+        self.lastClickedNode = undefined;
     }
 
     function removeLineOfNode(node) {
@@ -416,12 +423,12 @@ function Canvas(canvasDOM) {
         if (index > -1) {
             lines.splice(index, 1);
         }
-        
+
         index = line.nodeA.linesOfDirection[line.directionA].indexOf(line);
         if (index > -1) {
             line.nodeA.linesOfDirection[line.directionA].splice(index, 1);
         }
-        
+
         index = line.nodeB.linesOfDirection[line.directionB].indexOf(line);
         if (index > -1) {
             line.nodeB.linesOfDirection[line.directionB].splice(index, 1);
@@ -451,4 +458,11 @@ function Canvas(canvasDOM) {
         }
         ctx.stroke();
     }
+
+    this.getLastClickedNode = function () {
+        return this.lastClickedNode;
+    };
+    this.getNodes = function () {
+        return nodes;
+    };
 }
