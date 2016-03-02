@@ -28,18 +28,16 @@ $(window).load(function () {
 
             ctx.lineWidth = 2;
             ctx.strokeStyle = "black";
-            ctx.fillStyle = "black";
 
             // 사각형 그리기
             ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(width, 0);
-            ctx.lineTo(width, height);
-            ctx.lineTo(0, height);
-            ctx.lineTo(0, 0);
+            ctx.rect(0, 0, width, height);
+            ctx.fillStyle = "white";
+            ctx.fill();
             ctx.stroke();
 
             // 글씨 가운데에다가 적기
+            ctx.fillStyle = "black";
             ctx.font = font;
             ctx.textAlign = "center";
             ctx.fillText(text, width / 2, (height + fontSize) / 2, width);
@@ -68,18 +66,16 @@ $(window).load(function () {
 
             ctx.lineWidth = 2;
             ctx.strokeStyle = "black";
-            ctx.fillStyle = "black";
 
             // 사각형 그리기
             ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(width, 0);
-            ctx.lineTo(width, height);
-            ctx.lineTo(0, height);
-            ctx.lineTo(0, 0);
+            ctx.rect(0, 0, width, height);
+            ctx.fillStyle = "white";
+            ctx.fill();
             ctx.stroke();
 
             // 글씨 가운데에다가 적기
+            ctx.fillStyle = "black";
             ctx.font = font;
             ctx.textAlign = "center";
             ctx.fillText(text, width / 2, (height + fontSize) / 2, width);
@@ -132,18 +128,16 @@ $(window).load(function () {
 
             ctx.lineWidth = 2;
             ctx.strokeStyle = "black";
-            ctx.fillStyle = "black";
 
             // 사각형 그리기
             ctx.beginPath();
-            ctx.moveTo(0, 0);
-            ctx.lineTo(width, 0);
-            ctx.lineTo(width, height);
-            ctx.lineTo(0, height);
-            ctx.lineTo(0, 0);
+            ctx.rect(0, 0, width, height);
+            ctx.fillStyle = "white";
+            ctx.fill();
             ctx.stroke();
 
             // 글씨 가운데에다가 적기
+            ctx.fillStyle = "black";
             ctx.font = font;
             ctx.textAlign = "center";
             ctx.fillText(text, width / 2, (height + fontSize) / 2, width);

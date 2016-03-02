@@ -32,11 +32,35 @@ function Canvas(canvasDOM) {
     var editingPointPair = -1;
     this.lastClickedNode = '123';
     var self = this;
+    var clipboard = {
+        nodeInfos: []
+            // nodeInfo
+            // {
+            //     drawable
+            //     x
+            //     y
+            //     width
+            //     height
+            // }
+    };
 
     function onKeyDown(e) {
         // 17 == ctrl
         if (e.keyCode == 17) {
             isCtrlKeyPressed = true;
+        }
+        // 67 == c
+        else if (e.keyCode == 67 && isCtrlKeyPressed == true) {
+            copyClickedNodes();
+        }
+        // 88 == x
+        else if (e.keyCode == 88 && isCtrlKeyPressed == true) {
+            copyClickedNodes();
+            removeClickedNodes();
+        }
+        // 86 == v
+        else if (e.keyCode == 86 && isCtrlKeyPressed == true) {
+            pasteClickedNodes();
         }
     }
 
@@ -76,6 +100,7 @@ function Canvas(canvasDOM) {
         else if (e.keyCode == 71) {
             isDrawGrid = !isDrawGrid;
         }
+
     }
     // register the handler 
     document.addEventListener('keydown', onKeyDown, false);
@@ -95,7 +120,8 @@ function Canvas(canvasDOM) {
             y = position.y;
         }
         var node = new Node(drawable, x, y, width, height);
-        nodes.push(node);
+        nodes.unshift(node);
+        return node;
     };
 
     this.onRender = function () {
@@ -125,7 +151,7 @@ function Canvas(canvasDOM) {
                 if (temporaryLine) {
                     temporaryLine.onRender(ctx);
                 }
-                for (var i in nodes) {
+                for (var i = nodes.length - 1; i >= 0; i--) {
                     var node = nodes[i];
                     var isFocus = false;
                     var isClicked = false;
@@ -155,6 +181,7 @@ function Canvas(canvasDOM) {
     $(canvasDOM).mousedown(function (e) {
         isMouseDown = true;
         updateMousePosition(e);
+        isCtrlKeyPressed = e.ctrlKey;
         switch (canvasStateMachine) {
         case CanvasState.LINE_CLICKED:
         case CanvasState.IDLE:
@@ -205,6 +232,7 @@ function Canvas(canvasDOM) {
     }).mouseup(function (e) {
         isMouseDown = false;
         updateMousePosition(e);
+        isCtrlKeyPressed = e.ctrlKey;
 
         switch (canvasStateMachine) {
         case CanvasState.NODE_CLICKED:
@@ -247,6 +275,7 @@ function Canvas(canvasDOM) {
         var prevY = mouseY;
 
         updateMousePosition(e);
+        isCtrlKeyPressed = e.ctrlKey;
 
         var dX = mouseX - prevX;
         var dY = mouseY - prevY;
@@ -267,7 +296,10 @@ function Canvas(canvasDOM) {
             });
             break;
         case CanvasState.NODE_CLICKED:
-            focusedNode.moveBy(dX, dY);
+            for (var i in clickedNodes) {
+                var node = clickedNodes[i];
+                node.moveBy(dX, dY);
+            }
             break;
         case CanvasState.DRAWING_LINE_POINT_CLICKED:
 
@@ -311,9 +343,11 @@ function Canvas(canvasDOM) {
     }).mouseenter(function (e) {
         console.log('enter');
         updateMousePosition(e);
+        isCtrlKeyPressed = e.ctrlKey;
     }).mouseleave(function (e) {
         console.log('leave');
         updateMousePosition(e);
+        isCtrlKeyPressed = e.ctrlKey;
         focusUpdate();
         canvasStateMachine = CanvasState.IDLE;
         temporaryLine = undefined;
@@ -465,4 +499,34 @@ function Canvas(canvasDOM) {
     this.getNodes = function () {
         return nodes;
     };
+
+    function copyClickedNodes() {
+        clipboard.nodeInfos = [];
+        // find baseX and baseY
+        for (var i in clickedNodes) {
+            var clickedNode = clickedNodes[i];
+            clipboard.nodeInfos.push({
+                drawable: clickedNode.drawable,
+                x: clickedNode.x,
+                y: clickedNode.y,
+                width: clickedNode.width,
+                height: clickedNode.height
+            });
+        }
+        console.log(clipboard);
+    }
+
+    function pasteClickedNodes() {
+        clickedNodes = [];
+        var pasteGap = 20;
+        for (var i in clipboard.nodeInfos) {
+            var nodeInfo = clipboard.nodeInfos[i];
+            var newNode = self.addNode(nodeInfo.drawable,
+                nodeInfo.x + pasteGap,
+                nodeInfo.y - pasteGap,
+                nodeInfo.width,
+                nodeInfo.height);
+            clickedNodes.push(newNode);
+        }
+    }
 }
