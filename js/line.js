@@ -1,6 +1,7 @@
 'use strict';
 /* global DrawingLinePointDirection */
 /* global Point */
+/* global Node */
 
 var isCurve = false;
 
@@ -16,7 +17,7 @@ function onKeyUp(e) {
 // register the handler 
 document.addEventListener('keyup', onKeyUp, false);
 
-function Line(nodeA, directionA, nodeB, directionB) {
+function Line(nodeA, directionA, nodeB, directionB, toMouse, mouseX, mouseY) {
 
     this.nodeA = nodeA;
     this.directionA = directionA;
@@ -43,26 +44,46 @@ function Line(nodeA, directionA, nodeB, directionB) {
     this.titleFontFamily = 'Arial';
     var editDiamondLength = 8;
 
+    this.toMouse = toMouse;
+    this.mouseX = mouseX;
+    this.mouseY = mouseY;
+    if (toMouse == true && !!!nodeB) {
+        this.nodeB = nodeB = new Node(function () {}, mouseX, mouseY, 0, 0);
+        if (this.nodeA.y > this.mouseY) {
+            this.directionB = directionB = DrawingLinePointDirection.BOTTOM;
+        }
+        else {
+            if (this.mouseY < this.nodeA.y + this.nodeA.height) {
+                if (this.mouseX < nodeA.x) {
+                    this.directionB = directionB = DrawingLinePointDirection.RIGHT;
+                }
+                else {
+                    this.directionB = directionB = DrawingLinePointDirection.LEFT;
+                }
+            }
+            else {
+                this.directionB = directionB = DrawingLinePointDirection.TOP;
+            }
+        }
+    }
 
     var lineWidth = 2;
 
     var belowNode, belowDirection, aboveNode, aboveDirection;
 
-
-
     this.calculateDrawingPoints = function () { // direction for drawingLinePointDirection
         const LEAST_GAP = 10;
-        if (nodeA.y > nodeB.y) {
-            belowNode = nodeA;
-            belowDirection = directionA;
-            aboveNode = nodeB;
-            aboveDirection = directionB;
+        if (this.nodeA.y > this.nodeB.y) {
+            belowNode = this.nodeA;
+            belowDirection = this.directionA;
+            aboveNode = this.nodeB;
+            aboveDirection = this.directionB;
         }
         else {
-            belowNode = nodeB;
-            belowDirection = directionB;
-            aboveNode = nodeA;
-            aboveDirection = directionA;
+            belowNode = this.nodeB;
+            belowDirection = this.directionB;
+            aboveNode = this.nodeA;
+            aboveDirection = this.directionA;
         }
 
         var belowLeftX = belowNode.x - LEAST_GAP;
@@ -402,17 +423,16 @@ function Line(nodeA, directionA, nodeB, directionB) {
             }
             break;
         }
-
     };
     this.calculateDrawingPoints();
 
     this.onRender = function (ctx, strokeStyle, onEditMode) {
 
         var isNodePositionChanged = false;
-        if (prevNodeAPosition.x != nodeA.x ||
-            prevNodeAPosition.y != nodeA.y ||
-            prevNodeBPosition.x != nodeB.x ||
-            prevNodeBPosition.y != nodeB.y) {
+        if (prevNodeAPosition.x != this.nodeA.x ||
+            prevNodeAPosition.y != this.nodeA.y ||
+            prevNodeBPosition.x != this.nodeB.x ||
+            prevNodeBPosition.y != this.nodeB.y) {
             isNodePositionChanged = true;
             this.calculateDrawingPoints();
         }
@@ -446,8 +466,8 @@ function Line(nodeA, directionA, nodeB, directionB) {
 
         // draw arrow
 
-        var nodeBStartPosition = nodeB.getLineStartPosition(directionB);
-        drawArrow(ctx, directionB, nodeBStartPosition.x, nodeBStartPosition.y);
+        var nodeBStartPosition = this.nodeB.getLineStartPosition(this.directionB);
+        drawArrow(ctx, this.directionB, nodeBStartPosition.x, nodeBStartPosition.y);
 
         // title
         if (isTitleChanged) {
@@ -482,10 +502,10 @@ function Line(nodeA, directionA, nodeB, directionB) {
         ctx.stroke();
 
         if (isNodePositionChanged) {
-            prevNodeAPosition.x = nodeA.x;
-            prevNodeAPosition.y = nodeA.y;
-            prevNodeBPosition.x = nodeB.x;
-            prevNodeBPosition.y = nodeB.y;
+            prevNodeAPosition.x = this.nodeA.x;
+            prevNodeAPosition.y = this.nodeA.y;
+            prevNodeBPosition.x = this.nodeB.x;
+            prevNodeBPosition.y = this.nodeB.y;
         }
 
         if (onEditMode) {
@@ -631,7 +651,7 @@ function Line(nodeA, directionA, nodeB, directionB) {
     };
 
     this.handleEditPointsPair = function (index, dx, dy) {
-        if(index < 0) return;
+        if (index < 0) return;
         var frontPoint = this.points[index];
         var rearPoint = this.points[index + 1];
 

@@ -274,6 +274,9 @@ function Canvas(canvasDOM) {
                         temporaryLine = new Line(focusedNode, clickedNodeDrawingLinePointDirection, node, direction);
                         // don't push temporaryLine to lines
                     }
+                } else {
+                    var toMouse = true;
+                    temporaryLine = new Line(focusedNode, clickedNodeDrawingLinePointDirection, null, null, toMouse, mouseX, mouseY);
                 }
             });
             break;
