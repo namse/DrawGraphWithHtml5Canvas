@@ -30,9 +30,9 @@ $(window).load(function () {
             ctx.strokeStyle = "black";
 
             // 사각형 그리기
+            ctx.fillStyle = "white";
             ctx.beginPath();
             ctx.rect(0, 0, width, height);
-            ctx.fillStyle = "white";
             ctx.fill();
             ctx.stroke();
 
@@ -68,9 +68,9 @@ $(window).load(function () {
             ctx.strokeStyle = "black";
 
             // 사각형 그리기
+            ctx.fillStyle = "white";
             ctx.beginPath();
             ctx.rect(0, 0, width, height);
-            ctx.fillStyle = "white";
             ctx.fill();
             ctx.stroke();
 
@@ -130,9 +130,9 @@ $(window).load(function () {
             ctx.strokeStyle = "black";
 
             // 사각형 그리기
+            ctx.fillStyle = "white";
             ctx.beginPath();
             ctx.rect(0, 0, width, height);
-            ctx.fillStyle = "white";
             ctx.fill();
             ctx.stroke();
 

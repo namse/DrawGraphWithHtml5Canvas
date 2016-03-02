@@ -13,7 +13,8 @@ function Canvas(canvasDOM) {
         NODE_CLICKED: 'NODE_CLICKED',
         DRAWING_LINE_POINT_CLICKED: 'DRAWING_LINE_POINT_CLICKED',
         LINE_CLICKED: 'LINE_CLICKED',
-        TITLE_CLICKED: 'TITLE_CLICKED'
+        TITLE_CLICKED: 'TITLE_CLICKED',
+        DRAG: "DRAG",
     };
     var canvasStateMachine = CanvasState.IDLE;
     var mouseX;
@@ -43,6 +44,7 @@ function Canvas(canvasDOM) {
             //     height
             // }
     };
+    var mouseDragStartPoint;
 
     function onKeyDown(e) {
         // 17 == ctrl
@@ -133,12 +135,24 @@ function Canvas(canvasDOM) {
             else {
                 ctx.setTransform(1, 0, 0, 1, 0, 0);
                 ctx.clearRect(0, 0, canvasDOM.width, canvasDOM.height);
-
+                
+                // drag rect
+                if(canvasStateMachine == CanvasState.DRAG){
+                    ctx.save();
+                    ctx.strokeStyle = 'black';
+                    ctx.fillStyle = 'gray';
+                    ctx.rect(mouseDragStartPoint.x, mouseDragStartPoint.y, mouseX - mouseDragStartPoint.x, mouseY - mouseDragStartPoint.y);
+                    ctx.stroke();
+                    ctx.fill();
+                    ctx.restore();
+                }
+                
                 if (isDrawGrid) {
                     drawGrid(ctx);
                 }
 
                 for (var i in lines) {
+                    ctx.save();
                     var line = lines[i];
                     if (line == focusedLine) {
                         var isEditMode = true;
@@ -147,6 +161,7 @@ function Canvas(canvasDOM) {
                     else {
                         line.onRender(ctx);
                     }
+                    ctx.restore();
                 }
                 if (temporaryLine) {
                     temporaryLine.onRender(ctx);
@@ -163,6 +178,8 @@ function Canvas(canvasDOM) {
                     }
                     node.onRender(ctx, isFocus, isClicked);
                 }
+                
+                
             }
         }
     };
@@ -218,7 +235,8 @@ function Canvas(canvasDOM) {
                                     canvasStateMachine = CanvasState.TITLE_CLICKED;
                                 }
                                 else {
-                                    canvasStateMachine = CanvasState.IDLE;
+                                    canvasStateMachine = CanvasState.DRAG;
+                                    mouseDragStartPoint = new Point(mouseX, mouseY);
                                     clickedNodes = [];
                                 }
                             });
@@ -268,6 +286,9 @@ function Canvas(canvasDOM) {
             break;
         case CanvasState.LINE_CLICKED:
             editingPointPair = -1;
+            break;
+        case CanvasState.DRAG:
+            canvasStateMachine = CanvasState.IDLE;
             break;
         }
     }).mousemove(function (e) {
@@ -338,6 +359,9 @@ function Canvas(canvasDOM) {
         case CanvasState.TITLE_CLICKED:
             clickedTitleLine.titlePosition.x += dX;
             clickedTitleLine.titlePosition.y += dY;
+            break;
+        case CanvasState.DRAG:
+            findNodesOnDragArea();
             break;
         }
     }).mouseenter(function (e) {
@@ -527,6 +551,16 @@ function Canvas(canvasDOM) {
                 nodeInfo.width,
                 nodeInfo.height);
             clickedNodes.push(newNode);
+        }
+    }
+
+    function findNodesOnDragArea() {
+        clickedNodes = [];
+        for (var i in nodes) {
+            var node = nodes[i];
+            if (mouseDragStartPoint.x <= node.x && node.x + node.width <= mouseX && mouseDragStartPoint.y <= node.y && node.y + node.height <= mouseY) {
+                clickedNodes.push(node);
+            }
         }
     }
 }
