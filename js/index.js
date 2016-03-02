@@ -195,3 +195,7 @@ function drop(ev) {
 
     canvas.addNode(drawableObject.drawFunction, positionX, positionY, drawableObject.width, drawableObject.height);
 }
+
+function ondbclick(){
+    console.log(canvas);
+}
