@@ -70,7 +70,7 @@ function Canvas(canvasDOM) {
             if (clickedNodes.length == 1 && e.shiftKey) {
                 var x = clickedNodes[0].x;
                 var y = clickedNodes[0].y;
-                
+
                 switch (e.keyCode) {
                 case 37: // left key
                     x -= 1;
@@ -109,13 +109,13 @@ function Canvas(canvasDOM) {
                     dy = 1;
                     break;
                 }
-                
+
                 if (e.shiftKey) {
                     dx *= gridWidth;
                     dy *= gridWidth;
                 }
-                
-                for(var i in clickedNodes){
+
+                for (var i in clickedNodes) {
                     var node = clickedNodes[i];
                     node.x += dx;
                     node.y += dy;
@@ -527,8 +527,9 @@ function Canvas(canvasDOM) {
 
     function removeLineOfNode(node) {
         for (var direction in DrawingLinePointDirection) {
-            for (var i in node.linesOfDirection[direction]) {
-                var line = node.linesOfDirection[direction][i];
+            var lines = node.linesOfDirection[direction].slice();
+            for (var i in lines) {
+                var line = lines[i];
                 removeLine(line);
             }
         }
