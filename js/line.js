@@ -17,13 +17,13 @@ function onKeyUp(e) {
 // register the handler 
 document.addEventListener('keyup', onKeyUp, false);
 
-function Line(nodeA, directionA, nodeB, directionB, toMouse, mouseX, mouseY) {
+function Line(nodeA, directionA, nodeB, directionB, toMouse, mouseX, mouseY, points) {
 
     this.nodeA = nodeA;
     this.directionA = directionA;
     this.nodeB = nodeB;
     this.directionB = directionB;
-    this.points = []; // below -> above
+    this.points = points || []; // below -> above
     var title = '';
     var isTitleChanged = false;
     var titleWidth = 0;
@@ -424,7 +424,9 @@ function Line(nodeA, directionA, nodeB, directionB, toMouse, mouseX, mouseY) {
             break;
         }
     };
-    this.calculateDrawingPoints();
+    if (this.points.length <= 0) {
+        this.calculateDrawingPoints();
+    }
 
     this.onRender = function (ctx, strokeStyle, onEditMode) {
 
