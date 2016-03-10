@@ -209,21 +209,27 @@ function Canvas(canvasDOM) {
                     drawGrid(ctx);
                 }
 
+
+                // draw lines which not selected
                 for (var i in lines) {
                     ctx.save();
                     var line = lines[i];
-                    if (line == focusedLine) {
-                        var isEditMode = true;
-                        line.onRender(ctx, 'red', isEditMode);
-                    }
-                    else {
+                    if (line != focusedLine) {
                         line.onRender(ctx);
                     }
                     ctx.restore();
                 }
+
                 if (temporaryLine) {
                     temporaryLine.onRender(ctx);
                 }
+
+                // draw lines selected
+                var isEditMode = true;
+                if (focusedLine) {
+                    focusedLine.onRender(ctx, 'red', isEditMode);
+                }
+                
                 for (var i = nodes.length - 1; i >= 0; i--) {
                     var node = nodes[i];
                     var isFocus = false;
